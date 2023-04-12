@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net/smtp"
 	"strings"
+	"time"
 
 	"github.com/czcorpus/cnc-gokit/datetime"
 )
@@ -34,11 +35,16 @@ type NotificationConf struct {
 	Signature map[string]string `json:"signature"`
 }
 
+type Notification struct {
+	Subject    string
+	Paragraphs []string
+}
+
 // SendNotification sends a general e-mail notification based on
 // a respective monitoring configuration. The 'alarmToken' argument
 // can be nil - in such case the 'turn of the alarm' text won't be
 // part of the message.
-func SendNotification(conf *NotificationConf, subject string, msgParagraphs ...string) error {
+func SendNotification(conf *NotificationConf, location *time.Location, msg Notification) error {
 	client, err := smtp.Dial(conf.SMTPServer)
 	if err != nil {
 		return err
@@ -59,7 +65,7 @@ func SendNotification(conf *NotificationConf, subject string, msgParagraphs ...s
 	headers := make(map[string]string)
 	headers["From"] = conf.Sender
 	headers["To"] = strings.Join(conf.Receivers, ",")
-	headers["Subject"] = subject
+	headers["Subject"] = msg.Subject
 	headers["MIME-Version"] = "1.0"
 	headers["Content-Type"] = "text/html; charset=UTF-8"
 
@@ -67,10 +73,10 @@ func SendNotification(conf *NotificationConf, subject string, msgParagraphs ...s
 	for k, v := range headers {
 		body += fmt.Sprintf("%s: %s\r\n", k, v)
 	}
-	for _, par := range msgParagraphs {
+	for _, par := range msg.Paragraphs {
 		body += "<p>" + par + "</p>\r\n\r\n"
 	}
-	body += fmt.Sprintf("<p>Generated at %s</p>\r\n\r\n", datetime.GetCurrentDatetime())
+	body += fmt.Sprintf("<p>Generated at %s</p>\r\n\r\n", datetime.GetCurrentDatetimeIn(location))
 
 	buf := bytes.NewBufferString(body)
 	_, err = buf.WriteTo(wc)

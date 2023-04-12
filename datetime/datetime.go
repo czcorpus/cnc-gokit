@@ -22,6 +22,10 @@ func GetCurrentDatetime() string {
 	return time.Now().Format("2006-01-02T15:04:05")
 }
 
+func GetCurrentDatetimeIn(loc *time.Location) string {
+	return time.Now().In(loc).Format("2006-01-02T15:04:05")
+}
+
 func FormatDatetime(dt time.Time) string {
 	return dt.Format("2006-01-02T15:04:05")
 }
