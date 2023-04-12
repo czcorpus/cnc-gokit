@@ -17,10 +17,11 @@ package mail
 
 import (
 	"bytes"
-	"cnc-gokit/datetime"
 	"fmt"
 	"net/smtp"
 	"strings"
+
+	"github.com/czcorpus/cnc-gokit/datetime"
 )
 
 type NotificationConf struct {
