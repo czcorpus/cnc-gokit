@@ -27,12 +27,25 @@ import (
 
 type NotificationConf struct {
 	Sender       string   `json:"sender"`
-	Receivers    []string `json:"receivers"`
+	Recipients   []string `json:"recipients"`
 	SMTPServer   string   `json:"smtpServer"`
 	SMTPUsername string   `json:"smtpUsername"`
 	SMTPPassword string   `json:"smtpPassword"`
 	// Signature defines multi-language signature for notification e-mails
 	Signature map[string]string `json:"signature"`
+}
+
+// WithRecipients creates a new NotificationConf instance
+// with recipients overwritten by the provided ones
+func (nc NotificationConf) WithRecipients(r ...string) NotificationConf {
+	return NotificationConf{
+		Sender:       nc.Sender,
+		Recipients:   r,
+		SMTPServer:   nc.SMTPServer,
+		SMTPUsername: nc.SMTPUsername,
+		SMTPPassword: nc.SMTPPassword,
+		Signature:    nc.Signature,
+	}
 }
 
 type Notification struct {
@@ -52,7 +65,7 @@ func SendNotification(conf *NotificationConf, location *time.Location, msg Notif
 	defer client.Close()
 
 	client.Mail(conf.Sender)
-	for _, rcpt := range conf.Receivers {
+	for _, rcpt := range conf.Recipients {
 		client.Rcpt(rcpt)
 	}
 
@@ -64,7 +77,7 @@ func SendNotification(conf *NotificationConf, location *time.Location, msg Notif
 
 	headers := make(map[string]string)
 	headers["From"] = conf.Sender
-	headers["To"] = strings.Join(conf.Receivers, ",")
+	headers["To"] = strings.Join(conf.Recipients, ",")
 	headers["Subject"] = msg.Subject
 	headers["MIME-Version"] = "1.0"
 	headers["Content-Type"] = "text/html; charset=UTF-8"
