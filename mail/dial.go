@@ -13,32 +13,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package smtp
+package mail
 
 import (
 	"crypto/tls"
 	"fmt"
 	"net"
-	xsmtp "net/smtp"
+	"net/smtp"
 )
 
 // DialServer dials a SMTP server using provided arguments. The 'server' argument
 // should also contain a port number (e.g. 'localhost:25'). Anything other than
 // port 25 is considered to be a connection with authentication over TLS.
-func DialServer(server, username, password string) (*xsmtp.Client, error) {
+func DialServer(server, username, password string) (*smtp.Client, error) {
 	host, port, err := net.SplitHostPort(server)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse SMTP server info: %w", err)
 	}
 	if port == "25" {
-		ans, err := xsmtp.Dial(server)
+		ans, err := smtp.Dial(server)
 		if err != nil {
 			return nil, fmt.Errorf("failed to dial: %w", err)
 		}
 		return ans, err
 	}
-	auth := xsmtp.PlainAuth("", username, password, host)
-	client, err := xsmtp.Dial(server)
+	auth := smtp.PlainAuth("", username, password, host)
+	client, err := smtp.Dial(server)
 	if err != nil {
 		return nil, fmt.Errorf("failed to dial: %w", err)
 	}

@@ -9,6 +9,6 @@ applications.
 
 ### fs
 
-### smtp
+### mail
 
 ### strnum
