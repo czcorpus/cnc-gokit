@@ -18,13 +18,13 @@ package mail
 import (
 	"bytes"
 	"fmt"
-	"net/smtp"
 	"strings"
 	"time"
 
 	"github.com/czcorpus/cnc-gokit/datetime"
 )
 
+// NotificationConf configures e-mail-based notification
 type NotificationConf struct {
 	Sender       string   `json:"sender"`
 	Recipients   []string `json:"recipients"`
@@ -48,17 +48,18 @@ func (nc NotificationConf) WithRecipients(r ...string) NotificationConf {
 	}
 }
 
+// Notification represents a general notification e-mail
+// subject and body.
 type Notification struct {
 	Subject    string
 	Paragraphs []string
 }
 
-// SendNotification sends a general e-mail notification based on
-// a respective monitoring configuration. The 'alarmToken' argument
-// can be nil - in such case the 'turn of the alarm' text won't be
-// part of the message.
+// SendNotification sends a general e-mail notification.
+// Based on configuration, it is able to use SMTP servers
+// requiring TLS and authentication (see Dial()).
 func SendNotification(conf *NotificationConf, location *time.Location, msg Notification) error {
-	client, err := smtp.Dial(conf.SMTPServer)
+	client, err := DialServer(conf.SMTPServer, conf.SMTPUsername, conf.SMTPPassword)
 	if err != nil {
 		return err
 	}

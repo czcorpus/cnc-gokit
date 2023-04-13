@@ -17,15 +17,20 @@ package datetime
 
 import "time"
 
-// GetCurrentDatetime returns current date and time in ISO date format
+// GetCurrentDatetime returns current UTC date and time in ISO 8601
+// date format without timezone info (e.g. 2023-04-13T08:19:03)
 func GetCurrentDatetime() string {
 	return time.Now().Format("2006-01-02T15:04:05")
 }
 
+// GetCurrentDatetimeIn returns current local date and time in ISO 8601
+// date format without timezone info (e.g. 2023-04-13T08:19:03)
 func GetCurrentDatetimeIn(loc *time.Location) string {
 	return time.Now().In(loc).Format("2006-01-02T15:04:05")
 }
 
+// FormatDatetime creates an ISO 8601 formatted string
+// based on provided time.
 func FormatDatetime(dt time.Time) string {
 	return dt.Format("2006-01-02T15:04:05")
 }

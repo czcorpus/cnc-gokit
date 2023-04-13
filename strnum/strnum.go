@@ -16,17 +16,37 @@
 package strnum
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
 
-func JoinNumbersAsString(nums []int) string {
+type anyNumber interface {
+	int | int64 | float32 | float64
+}
+
+func numToString[T anyNumber](n T) string {
+	switch nx := any(n).(type) {
+	case int:
+		return strconv.Itoa(nx)
+	case int64:
+		return strconv.FormatInt(nx, 10)
+	case float32, float64:
+		return fmt.Sprintf("%01.2f", nx)
+	}
+	return ""
+}
+
+// JoinNumbersAsString joins numbers to a string where items
+// are separated with comma and space (e.g. '1, 173, 407').
+// Float numbers are formatted with 2 decimal places.
+func JoinNumbersAsString[T anyNumber](nums []T) string {
 	var b strings.Builder
 	for i, n := range nums {
 		if i > 0 {
 			b.WriteString(", ")
 		}
-		b.WriteString(strconv.Itoa(n))
+		b.WriteString(numToString(n))
 	}
 	return b.String()
 }

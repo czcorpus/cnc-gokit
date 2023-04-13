@@ -35,6 +35,8 @@ func IsFile(path string) (bool, error) {
 	return finfo.Mode().IsRegular(), nil
 }
 
+// DeleteFile deletes a regular file. If not found
+// or any other occurs, error is returned.
 func DeleteFile(path string) error {
 	isFile, err := IsFile(path)
 	if err != nil {
@@ -46,17 +48,17 @@ func DeleteFile(path string) error {
 	return os.Remove(path)
 }
 
-func GetFileMtime(filePath string) time.Time {
+// GetFileMtime returns a file modification time
+func GetFileMtime(filePath string) (time.Time, error) {
 	f, err := os.Open(filePath)
 	if err != nil {
-		return time.Time{}
+		return time.Time{}, err
 	}
 	finfo, err := f.Stat()
-	if err == nil {
-		return time.Unix(finfo.ModTime().Unix(), 0)
-
+	if err != nil {
+		return time.Time{}, err
 	}
-	return time.Time{}
+	return time.Unix(finfo.ModTime().Unix(), 0), nil
 }
 
 // IsDir tests whether a provided path represents
