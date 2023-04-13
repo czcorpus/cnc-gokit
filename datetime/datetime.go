@@ -15,7 +15,10 @@
 
 package datetime
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // GetCurrentDatetime returns current UTC date and time in ISO 8601
 // date format without timezone info (e.g. 2023-04-13T08:19:03)
@@ -33,4 +36,18 @@ func GetCurrentDatetimeIn(loc *time.Location) string {
 // based on provided time.
 func FormatDatetime(dt time.Time) string {
 	return dt.Format("2006-01-02T15:04:05")
+}
+
+func DurationToHMS(dur time.Duration) string {
+	numSec := int(dur.Seconds())
+	var sPrefix string
+	if numSec < 0 {
+		sPrefix = "-"
+		numSec = -numSec
+	}
+	hours := numSec / 3600
+	rest := numSec % 3600
+	mins := rest / 60
+	rest = rest % 60
+	return fmt.Sprintf("%s%02d:%02d:%02d", sPrefix, hours, mins, rest)
 }
