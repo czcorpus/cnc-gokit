@@ -6,6 +6,8 @@ applications.
 Please note that some convenience functions log warnings and errors
 via [zerolog](https://github.com/rs/zerolog).
 
+For a documentation please see https://pkg.go.dev/github.com/czcorpus/cnc-gokit
+
 ## Available modules
 
 ### datetime
