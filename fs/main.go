@@ -67,15 +67,11 @@ func GetFileMtime(filePath string) (time.Time, error) {
 // a directory. If not or in case of an IO error,
 // false is returned along with the error
 func IsDir(path string) (bool, error) {
-	f, err := os.Open(path)
+	fileInfo, err := os.Stat(path)
 	if err != nil {
 		return false, err
 	}
-	finfo, err := f.Stat()
-	if err != nil {
-		return false, err
-	}
-	return finfo.Mode().IsDir(), nil
+	return fileInfo.IsDir(), nil
 }
 
 // PathExists tests whether  the provided path exists no matter what it
