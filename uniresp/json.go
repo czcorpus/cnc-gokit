@@ -133,3 +133,15 @@ func WriteJSONErrorResponse(w http.ResponseWriter, aerr ActionError, status int,
 	w.WriteHeader(status)
 	w.Write(jsonAns)
 }
+
+// WriteCustonmJSONErrorResponse writes any JSON serializable object as an HTTP error response.
+// In case the value cannot be serialized into JSON, the function will write error
+// 500 (Internal Server Error).
+func WriteCustomJSONErrorResponse(w http.ResponseWriter, value any, status int, details ...string) {
+	jsonAns, err := json.Marshal(value)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.WriteHeader(status)
+	w.Write(jsonAns)
+}
