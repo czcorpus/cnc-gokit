@@ -18,38 +18,38 @@ package collections
 
 import "sync"
 
-type ConcurrentMap[T any] struct {
+type ConcurrentMap[K comparable, T any] struct {
 	sync.RWMutex
-	data map[string]T
+	data map[K]T
 }
 
-func (cm *ConcurrentMap[T]) Get(k string) T {
+func (cm *ConcurrentMap[K, T]) Get(k K) T {
 	cm.RLock()
 	defer cm.RUnlock()
 	return cm.data[k]
 }
 
-func (cm *ConcurrentMap[T]) GetWithTest(k string) (T, bool) {
+func (cm *ConcurrentMap[K, T]) GetWithTest(k K) (T, bool) {
 	cm.RLock()
 	defer cm.RUnlock()
 	v, ok := cm.data[k]
 	return v, ok
 }
 
-func (cm *ConcurrentMap[T]) HasKey(k string) bool {
+func (cm *ConcurrentMap[K, T]) HasKey(k K) bool {
 	cm.RLock()
 	defer cm.RUnlock()
 	_, ok := cm.data[k]
 	return ok
 }
 
-func (cm *ConcurrentMap[T]) Set(k string, v T) {
+func (cm *ConcurrentMap[K, T]) Set(k K, v T) {
 	cm.Lock()
 	defer cm.Unlock()
 	cm.data[k] = v
 }
 
-func (cm *ConcurrentMap[T]) ForEach(fn func(k string, v T)) {
+func (cm *ConcurrentMap[K, T]) ForEach(fn func(k K, v T)) {
 	cm.RLock()
 	defer cm.RUnlock()
 	for k, v := range cm.data {
@@ -57,7 +57,7 @@ func (cm *ConcurrentMap[T]) ForEach(fn func(k string, v T)) {
 	}
 }
 
-func (cm *ConcurrentMap[T]) Update(fn func(k string, v T) T) {
+func (cm *ConcurrentMap[K, T]) Update(fn func(k K, v T) T) {
 	cm.Lock()
 	defer cm.Unlock()
 	for k, v := range cm.data {
@@ -65,8 +65,8 @@ func (cm *ConcurrentMap[T]) Update(fn func(k string, v T) T) {
 	}
 }
 
-func (cm *ConcurrentMap[T]) Keys() []string {
-	ans := make([]string, len(cm.data))
+func (cm *ConcurrentMap[K, T]) Keys() []K {
+	ans := make([]K, len(cm.data))
 	i := 0
 	for k, _ := range cm.data {
 		ans[i] = k
@@ -75,7 +75,7 @@ func (cm *ConcurrentMap[T]) Keys() []string {
 	return ans
 }
 
-func (cm *ConcurrentMap[T]) Values() []T {
+func (cm *ConcurrentMap[K, T]) Values() []T {
 	ans := make([]T, len(cm.data))
 	i := 0
 	for _, v := range cm.data {
@@ -85,14 +85,14 @@ func (cm *ConcurrentMap[T]) Values() []T {
 	return ans
 }
 
-func NewConcurrentMap[T any]() *ConcurrentMap[T] {
-	return &ConcurrentMap[T]{
-		data: make(map[string]T),
+func NewConcurrentMap[K comparable, T any]() *ConcurrentMap[K, T] {
+	return &ConcurrentMap[K, T]{
+		data: make(map[K]T),
 	}
 }
 
-func NewConcurrentMapFrom[T any](data map[string]T) *ConcurrentMap[T] {
-	return &ConcurrentMap[T]{
+func NewConcurrentMapFrom[K comparable, T any](data map[K]T) *ConcurrentMap[K, T] {
+	return &ConcurrentMap[K, T]{
 		data: data,
 	}
 }

@@ -22,13 +22,13 @@ import (
 )
 
 func TestConcurrentMapSetGet(t *testing.T) {
-	c := NewConcurrentMap[int]()
+	c := NewConcurrentMap[string, int]()
 	c.Set("foo", 100)
 	assert.Equal(t, 100, c.Get("foo"))
 }
 
 func TestConcurrentMapGetWithTest(t *testing.T) {
-	c := NewConcurrentMap[int]()
+	c := NewConcurrentMap[string, int]()
 	c.Set("foo", 100)
 	v, ok := c.GetWithTest("foo")
 	assert.Equal(t, 100, v)
