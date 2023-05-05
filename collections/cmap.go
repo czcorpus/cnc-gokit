@@ -85,6 +85,18 @@ func (cm *ConcurrentMap[K, T]) Values() []T {
 	return ans
 }
 
+// AsMap creates a shallow copy of a map wrapped
+// by this ConcurrentMap
+func (cm *ConcurrentMap[K, T]) AsMap() map[K]T {
+	cm.RLock()
+	defer cm.RUnlock()
+	ans := make(map[K]T)
+	for k, v := range cm.data {
+		ans[k] = v
+	}
+	return ans
+}
+
 func NewConcurrentMap[K comparable, T any]() *ConcurrentMap[K, T] {
 	return &ConcurrentMap[K, T]{
 		data: make(map[K]T),
