@@ -10,6 +10,12 @@ For a documentation please see https://pkg.go.dev/github.com/czcorpus/cnc-gokit
 
 ## Available modules
 
+### collections
+
+- `ConcurrentMap`
+- `MultiDict`
+- `Set`
+
 ### datetime
 
 - mostly ISO 8601 related functions
