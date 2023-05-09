@@ -50,6 +50,8 @@ func (cm *ConcurrentMap[K, T]) Set(k K, v T) {
 }
 
 func (cm *ConcurrentMap[K, T]) Delete(k K) {
+	cm.Lock()
+	defer cm.Unlock()
 	delete(cm.data, k)
 }
 
@@ -70,6 +72,8 @@ func (cm *ConcurrentMap[K, T]) Update(fn func(k K, v T) T) {
 }
 
 func (cm *ConcurrentMap[K, T]) Keys() []K {
+	cm.RLock()
+	defer cm.RUnlock()
 	ans := make([]K, len(cm.data))
 	i := 0
 	for k, _ := range cm.data {
@@ -80,6 +84,8 @@ func (cm *ConcurrentMap[K, T]) Keys() []K {
 }
 
 func (cm *ConcurrentMap[K, T]) Values() []T {
+	cm.RLock()
+	defer cm.RUnlock()
 	ans := make([]T, len(cm.data))
 	i := 0
 	for _, v := range cm.data {
@@ -103,6 +109,8 @@ func (cm *ConcurrentMap[K, T]) AsMap() map[K]T {
 
 // Len returns number of key-value pairs stored in the map
 func (cm *ConcurrentMap[K, T]) Len() int {
+	cm.RLock()
+	defer cm.RUnlock()
 	return len(cm.data)
 }
 
