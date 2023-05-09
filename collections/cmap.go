@@ -49,6 +49,10 @@ func (cm *ConcurrentMap[K, T]) Set(k K, v T) {
 	cm.data[k] = v
 }
 
+func (cm *ConcurrentMap[K, T]) Delete(k K) {
+	delete(cm.data, k)
+}
+
 func (cm *ConcurrentMap[K, T]) ForEach(fn func(k K, v T)) {
 	cm.RLock()
 	defer cm.RUnlock()
@@ -95,6 +99,11 @@ func (cm *ConcurrentMap[K, T]) AsMap() map[K]T {
 		ans[k] = v
 	}
 	return ans
+}
+
+// Len returns number of key-value pairs stored in the map
+func (cm *ConcurrentMap[K, T]) Len() int {
+	return len(cm.data)
 }
 
 func NewConcurrentMap[K comparable, T any]() *ConcurrentMap[K, T] {
