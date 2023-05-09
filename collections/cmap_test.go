@@ -67,3 +67,29 @@ func TestConcurrentMapUpdate(t *testing.T) {
 		assert.Equal(t, i+2, c.Get(v))
 	}
 }
+
+func TestConcurrentMapLenZero(t *testing.T) {
+	c := NewConcurrentMap[string, int]()
+	assert.Equal(t, 0, c.Len())
+}
+
+func TestConcurrentMapLen(t *testing.T) {
+	c := NewConcurrentMap[string, int]()
+	c.Set("foo", 100)
+	assert.Equal(t, 1, c.Len())
+	c.Set("bar", 101)
+	assert.Equal(t, 2, c.Len())
+}
+
+func TestConcurrentMapDelete(t *testing.T) {
+	data := map[string]int{"foo": 1, "bar": 2, "baz": 3}
+	c := NewConcurrentMapFrom(data)
+	v, ok := c.GetWithTest("bar")
+	assert.Equal(t, 2, v)
+	assert.True(t, ok)
+	c.Delete("bar")
+	v, ok = c.GetWithTest("bar")
+	assert.Equal(t, 0, v)
+	assert.False(t, ok)
+
+}
