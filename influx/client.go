@@ -56,22 +56,22 @@ type Influxable interface {
 	GetTime() time.Time
 }
 
-type influxDBAdapter struct {
+type InfluxDBAdapter struct {
 	api             influxdb2api.WriteAPI
 	address         string
 	onErrorHandlers []func(error)
 }
 
-func (db *influxDBAdapter) WritePoint(p *write.Point) {
+func (db *InfluxDBAdapter) WritePoint(p *write.Point) {
 	db.api.WritePoint(p)
 }
 
-func (db *influxDBAdapter) Address() string {
+func (db *InfluxDBAdapter) Address() string {
 	return db.address
 }
 
-func ConnectAPI(conf *ConnectionConf, errListen <-chan error) *influxDBAdapter {
-	ans := new(influxDBAdapter)
+func ConnectAPI(conf *ConnectionConf, errListen <-chan error) *InfluxDBAdapter {
+	ans := new(InfluxDBAdapter)
 	ans.onErrorHandlers = make([]func(error), 0, 10)
 	var influxClient influxdb2.Client
 	if conf.IsConfigured() {
