@@ -8,7 +8,7 @@ via [zerolog](https://github.com/rs/zerolog).
 
 For a documentation please see https://pkg.go.dev/github.com/czcorpus/cnc-gokit
 
-## Available modules
+## Available packages
 
 ### collections
 
@@ -24,6 +24,14 @@ For a documentation please see https://pkg.go.dev/github.com/czcorpus/cnc-gokit
 
 The `fs` package contains miscellaneous functions for dealing with
 filesystems (obtaining file information, testing existence,...).
+
+### influx
+
+The `influx` serves as a wrapper for the InfluxDB client v2 offering a convenient
+way of storing data in an InfluxDB database.
+
+* `func ConnectAPI(conf *ConnectionConf, errListen <-chan error) *influxDBAdapter`
+* `func RunWriteConsumerSync[T Influxable](db *influxDBAdapter, measurement string, incomingData <-chan T)`
 
 ### mail
 
