@@ -26,7 +26,7 @@ import (
 // RecordWriter is a simple wrapper around InfluxDB client allowing
 // adding records in a convenient way.
 type RecordWriter[T Influxable] struct {
-	db *influxDBAdapter
+	db *InfluxDBAdapter
 }
 
 // AddRecord adds a record to a respective InfluxDB database
@@ -45,16 +45,16 @@ func (c *RecordWriter[T]) AddRecord(measurement string, rec T) {
 }
 
 // NewRecordWriter is a factory function for RecordWriter
-func NewRecordWriter[T Influxable](db *influxDBAdapter) *RecordWriter[T] {
+func NewRecordWriter[T Influxable](db *InfluxDBAdapter) *RecordWriter[T] {
 	return &RecordWriter[T]{db}
 }
 
 // RunWriteConsumerSync reads from incomingData channel and stores the data
-// to via a provided influxDBAdapter ('db' arg.). In case 'db' is nil, the
+// to via a provided InfluxDBAdapter ('db' arg.). In case 'db' is nil, the
 // function just listens to 'incomingData' and does nothing.
 // Typically, this function should run in its own goroutine.
 func RunWriteConsumerSync[T Influxable](
-	db *influxDBAdapter,
+	db *InfluxDBAdapter,
 	measurement string,
 	incomingData <-chan T,
 ) {
