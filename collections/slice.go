@@ -24,3 +24,28 @@ func SliceContains[T comparable](data []T, value T) bool {
 	}
 	return false
 }
+
+func SliceFindIndex[T any](data []T, cmp func(v T) bool) int {
+	for i, v := range data {
+		if cmp(v) {
+			return i
+		}
+	}
+	return -1
+}
+
+func SliceMap[T any, U any](data []T, mapFn func(v T, i int) U) []U {
+	ans := make([]U, len(data))
+	for i, item := range data {
+		ans[i] = mapFn(item, i)
+	}
+	return ans
+}
+
+func SliceReduce[T any, U any](data []T, reduceFn func(acc U, curr T, i int) U, initial U) U {
+	ans := initial
+	for i, item := range data {
+		ans = reduceFn(ans, item, i)
+	}
+	return ans
+}
