@@ -55,6 +55,11 @@ type ErrorResponse struct {
 	Code    int          `json:"code"`
 }
 
+type MultiErrorResponse struct {
+	Errors []string `json:"errors"`
+	Code   int      `json:"code"`
+}
+
 // WriteJSONResponse writes 'value' to an HTTP response encoded as JSON
 func WriteJSONResponse(w http.ResponseWriter, value any) {
 	jsonAns, err := json.Marshal(value)
@@ -125,6 +130,23 @@ func WriteJSONErrorResponse(w http.ResponseWriter, aerr ActionError, status int,
 		Code:    status,
 		Error:   &aerr,
 		Details: details,
+	}
+	jsonAns, err := json.Marshal(ans)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.WriteHeader(status)
+	w.Write(jsonAns)
+}
+
+func WriteJSONMultiErrorResponse(w http.ResponseWriter, errors []error, status int) {
+	errMsgs := make([]string, len(errors))
+	for i, e := range errors {
+		errMsgs[i] = e.Error()
+	}
+	ans := &MultiErrorResponse{
+		Code:   status,
+		Errors: errMsgs,
 	}
 	jsonAns, err := json.Marshal(ans)
 	if err != nil {
