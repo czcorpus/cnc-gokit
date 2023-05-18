@@ -39,3 +39,36 @@ func TestDurationToHMSNegative(t *testing.T) {
 	ans := DurationToHMS(d1)
 	assert.Equal(t, "-02:17:39", ans)
 }
+
+func TestDecodeDuration(t *testing.T) {
+	x, err := ParseDuration("9h")
+	d := 9 * time.Hour
+	assert.NoError(t, err)
+	assert.Equal(t, d, x)
+}
+
+func TestDecodeDurationComplex(t *testing.T) {
+	x, err := ParseDuration("10d8h17m3s")
+	d := 10*24*time.Hour + 8*time.Hour + 17*time.Minute + 3*time.Second
+	assert.NoError(t, err)
+	assert.Equal(t, d, x)
+}
+
+func TestDecodeDurationRepeated(t *testing.T) {
+	x, err := ParseDuration("10m30s1m")
+	d := 11*time.Minute + 30*time.Second
+	assert.NoError(t, err)
+	assert.Equal(t, d, x)
+}
+
+func TestDecodeDurationParsingErr(t *testing.T) {
+	x, err := ParseDuration("10X30s1m")
+	assert.Error(t, err)
+	assert.Equal(t, time.Duration(0), x)
+}
+
+func TestDecodeDurationParsingEmpty(t *testing.T) {
+	x, err := ParseDuration("")
+	assert.NoError(t, err)
+	assert.Equal(t, time.Duration(0), x)
+}

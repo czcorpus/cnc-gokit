@@ -17,7 +17,13 @@ package datetime
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 	"time"
+)
+
+var (
+	durationPattern = regexp.MustCompile(`(\d+)([smhdwy])`)
 )
 
 // GetCurrentDatetime returns current UTC date and time in ISO 8601
@@ -50,4 +56,41 @@ func DurationToHMS(dur time.Duration) string {
 	mins := rest / 60
 	rest = rest % 60
 	return fmt.Sprintf("%s%02d:%02d:%02d", sPrefix, hours, mins, rest)
+}
+
+// ParseDuration decodes string-encoded durations
+// like 10s, 17h, 3y, or even '5d 7m
+func ParseDuration(v string) (time.Duration, error) {
+	srch := durationPattern.FindAllStringSubmatch(v, -1)
+	var total time.Duration
+	var check int
+	for _, v := range srch {
+		check += len(v[0])
+	}
+	if check != len(v) {
+		return total, fmt.Errorf("failed to parse duration expression %s", v)
+	}
+	for _, v := range srch {
+		tv, err := strconv.Atoi(v[1])
+		if err != nil {
+			return total, fmt.Errorf("failed to parse duration (value: %s)", v)
+		}
+		switch v[2] {
+		case "s":
+			total += time.Duration(tv) * time.Second
+		case "m":
+			total += time.Duration(tv) * time.Minute
+		case "h":
+			total += time.Duration(tv) * time.Hour
+		case "d":
+			total += time.Duration(tv) * 24 * time.Hour
+		case "w":
+			total += time.Duration(tv) * 7 * 24 * time.Hour
+		case "y":
+			total += time.Duration(tv) * 365 * 24 * time.Hour
+		default:
+			return total, fmt.Errorf("unknown code %s", v[2])
+		}
+	}
+	return total, nil
 }
