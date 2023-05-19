@@ -26,7 +26,7 @@ import (
 
 // CheckSuperfluousURLArgs allows checking for presence of supported only
 // arguments in URL. It returns first error it encounters.
-func CheckSuperfluousURLArgs(req http.Request, allowedArgs []string) error {
+func CheckSuperfluousURLArgs(req *http.Request, allowedArgs []string) error {
 	for name := range req.URL.Query() {
 		if !collections.SliceContains(allowedArgs, name) {
 			return fmt.Errorf("unsupported URL argument %s", name)

@@ -24,7 +24,7 @@ import (
 )
 
 func TestCheckSuperfluousURLArgs(t *testing.T) {
-	req := http.Request{URL: &url.URL{}}
+	req := &http.Request{URL: &url.URL{}}
 	args := req.URL.Query()
 	args.Add("foo", "10")
 	args.Add("bar", "hit")
@@ -34,7 +34,7 @@ func TestCheckSuperfluousURLArgs(t *testing.T) {
 }
 
 func TestCheckSuperfluousURLArgs1Excess(t *testing.T) {
-	req := http.Request{URL: &url.URL{}}
+	req := &http.Request{URL: &url.URL{}}
 	args := req.URL.Query()
 	args.Add("foo", "10")
 	args.Add("bar", "hit")
