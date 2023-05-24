@@ -16,6 +16,8 @@
 package collections
 
 import (
+	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -91,5 +93,25 @@ func TestConcurrentMapDelete(t *testing.T) {
 	v, ok = c.GetWithTest("bar")
 	assert.Equal(t, 0, v)
 	assert.False(t, ok)
+}
 
+func TestNewConcurrentMapFromJSON(t *testing.T) {
+	src := `{"foo": 10, "bar": 20, "baz": 30}`
+	v, err := NewConcurrentMapFromJSON[string, int]([]byte(src))
+	assert.NoError(t, err)
+	assert.Equal(t, 10, v.Get("foo"))
+	assert.Equal(t, 20, v.Get("bar"))
+	assert.Equal(t, 30, v.Get("baz"))
+	assert.Equal(t, 3, v.Len())
+}
+
+func TestConcurrentMapJSONSerialization(t *testing.T) {
+	v := NewConcurrentMap[string, int]()
+	v.Set("foo", 10)
+	v.Set("bar", 20)
+	src, err := json.Marshal(v)
+	assert.NoError(t, err)
+	src2 := string(src)
+	assert.True(t, strings.Contains(src2, `"bar":20`))
+	assert.True(t, strings.Contains(src2, `"foo":10`))
 }

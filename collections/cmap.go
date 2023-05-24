@@ -16,7 +16,10 @@
 
 package collections
 
-import "sync"
+import (
+	"encoding/json"
+	"sync"
+)
 
 type ConcurrentMap[K comparable, T any] struct {
 	sync.RWMutex
@@ -114,6 +117,10 @@ func (cm *ConcurrentMap[K, T]) Len() int {
 	return len(cm.data)
 }
 
+func (cm *ConcurrentMap[K, T]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(cm.AsMap())
+}
+
 func NewConcurrentMap[K comparable, T any]() *ConcurrentMap[K, T] {
 	return &ConcurrentMap[K, T]{
 		data: make(map[K]T),
@@ -124,4 +131,15 @@ func NewConcurrentMapFrom[K comparable, T any](data map[K]T) *ConcurrentMap[K, T
 	return &ConcurrentMap[K, T]{
 		data: data,
 	}
+}
+
+func NewConcurrentMapFromJSON[K comparable, T any](data []byte) (*ConcurrentMap[K, T], error) {
+	data2 := make(map[K]T)
+	err := json.Unmarshal(data, &data2)
+	if err != nil {
+		return nil, err
+	}
+	return &ConcurrentMap[K, T]{
+		data: data2,
+	}, nil
 }
