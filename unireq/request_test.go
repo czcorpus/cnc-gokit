@@ -16,6 +16,7 @@
 package unireq
 
 import (
+	"net"
 	"net/http"
 	"net/url"
 	"testing"
@@ -42,4 +43,35 @@ func TestCheckSuperfluousURLArgs1Excess(t *testing.T) {
 	req.URL.RawQuery = args.Encode()
 	ans := CheckSuperfluousURLArgs(req, []string{"foo", "bar"})
 	assert.Error(t, ans)
+}
+
+func TestClientIPForwFor(t *testing.T) {
+	req := &http.Request{Header: make(http.Header)}
+	req.Header.Set("X-Forwarded-For", "192.168.1.17")
+	req.Header.Set("X-Client-Ip", "192.168.1.20")
+	ip := ClientIP(req)
+	assert.Equal(t, net.ParseIP("192.168.1.17"), ip)
+}
+
+func TestClientIPClientIP(t *testing.T) {
+	req := &http.Request{Header: make(http.Header)}
+	req.Header.Set("X-Client-Ip", "192.168.1.17")
+	req.Header.Set("X-Real-Ip", "192.168.1.20")
+	ip := ClientIP(req)
+	assert.Equal(t, net.ParseIP("192.168.1.17"), ip)
+}
+
+func TestClientIPRealIp(t *testing.T) {
+	req := &http.Request{Header: make(http.Header)}
+	req.Header.Set("X-Real-Ip", "192.168.1.17")
+	req.RemoteAddr = "192.168.1.20"
+	ip := ClientIP(req)
+	assert.Equal(t, net.ParseIP("192.168.1.17"), ip)
+}
+
+func TestClientIPRemoteAddr(t *testing.T) {
+	req := &http.Request{Header: make(http.Header)}
+	req.RemoteAddr = "192.168.1.17"
+	ip := ClientIP(req)
+	assert.Equal(t, net.ParseIP("192.168.1.17"), ip)
 }

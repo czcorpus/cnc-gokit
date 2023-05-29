@@ -19,6 +19,7 @@ package unireq
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 
 	"github.com/czcorpus/cnc-gokit/collections"
@@ -33,4 +34,25 @@ func CheckSuperfluousURLArgs(req *http.Request, allowedArgs []string) error {
 		}
 	}
 	return nil
+}
+
+// ClientIP tries to capture actual remote client IP address
+// even if the client communicates with proxy servers.
+// Please note that the "forwarded" HTTP header is not supported.
+//
+// In case nothing is found, nil is returned.
+func ClientIP(req *http.Request) net.IP {
+	src := req.Header.Get("x-forwarded-for")
+	if src != "" {
+		return net.ParseIP(src)
+	}
+	src = req.Header.Get("x-client-ip")
+	if src != "" {
+		return net.ParseIP(src)
+	}
+	src = req.Header.Get("x-real-ip")
+	if src != "" {
+		return net.ParseIP(src)
+	}
+	return net.ParseIP(req.RemoteAddr)
 }
