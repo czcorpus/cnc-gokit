@@ -15,31 +15,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package uniresp
+package gorilla
 
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/czcorpus/cnc-gokit/uniresp"
 )
 
-// NotFoundHandler is a handler for "not found" situations
-func NotFoundHandler(c *gin.Context) {
-	WriteJSONErrorResponse(
-		c.Writer, NewActionError("action not found"), http.StatusNotFound)
+type NotFoundHandler struct {
 }
 
-// NoMethodHandler is a handler for "method not allowed" situations
-func NoMethodHandler(c *gin.Context) {
-	WriteJSONErrorResponse(
-		c.Writer, NewActionError("method not allowed"), http.StatusMethodNotAllowed)
+func (handler NotFoundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	uniresp.WriteJSONErrorResponse(
+		w, uniresp.NewActionError("action not found"), http.StatusNotFound)
 }
 
-// LegacyActionHandler allows using old-style HTTP action processing methods
-// with "response writer" and "request" arguments. This is mostly for legacy
-// actions from "gorilla/mux" times.
-func LegacyActionHandler(fn func(w http.ResponseWriter, r *http.Request)) func(*gin.Context) {
-	return func(ctx *gin.Context) {
-		fn(ctx.Writer, ctx.Request)
-	}
+type NotAllowedHandler struct {
+}
+
+func (handler NotAllowedHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	uniresp.WriteJSONErrorResponse(
+		w, uniresp.NewActionError("method not allowed"), http.StatusMethodNotAllowed)
 }
