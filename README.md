@@ -33,6 +33,15 @@ way of storing data in an InfluxDB database.
 * `func ConnectAPI(conf *ConnectionConf, errListen <-chan error) *InfluxDBAdapter`
 * `func RunWriteConsumerSync[T Influxable](db *InfluxDBAdapter, measurement string, incomingData <-chan T)`
 
+### logging
+
+The `logging` package contains functions for a service logging setup based
+on ZeroLog.
+
+* `type LogLevel string`
+* `func SetupLogging(path string, level LogLevel)`
+* `func GinMiddleware() gin.HandlerFunc`
+
 ### mail
 
 The `mail` package contains functions for sending e-mails with simplicity in mind.
