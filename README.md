@@ -35,7 +35,14 @@ way of storing data in an InfluxDB database.
 
 ### logging
 
-Logging helper functions (e.g. a middleware for the Gin framework)
+
+The `logging` package contains functions for a service logging setup based
+on ZeroLog.
+
+* `type LogLevel string`
+* `func SetupLogging(path string, level LogLevel)`
+* `func GinMiddleware() gin.HandlerFunc`
+
 
 ### mail
 

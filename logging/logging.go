@@ -17,12 +17,59 @@
 package logging
 
 import (
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
+
+var (
+	levelMapping = map[LogLevel]zerolog.Level{
+		"debug":   zerolog.DebugLevel,
+		"info":    zerolog.InfoLevel,
+		"warning": zerolog.WarnLevel,
+		"warn":    zerolog.WarnLevel,
+		"error":   zerolog.ErrorLevel,
+	}
+)
+
+type LogLevel string
+
+func (ll LogLevel) IsDebugMode() bool {
+	return ll == "debug"
+}
+
+func (ll LogLevel) IsValid() bool {
+	_, ok := levelMapping[ll]
+	return ok
+}
+
+// SetupLogging is a common setup for different
+// CNC HTTP services.
+func SetupLogging(path string, level LogLevel) {
+	lev, ok := levelMapping[level]
+	if !ok {
+		log.Fatal().Msgf("Invalid logging level: %s", level)
+	}
+	zerolog.SetGlobalLevel(lev)
+	if path != "" {
+		logf, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Fatal().Msgf("Failed to initialize log. File: %s", path)
+		}
+		log.Logger = log.Output(logf)
+
+	} else {
+		log.Logger = log.Output(
+			zerolog.ConsoleWriter{
+				Out:        os.Stderr,
+				TimeFormat: time.RFC3339,
+			},
+		)
+	}
+}
 
 // GinMiddleware is a zerolog logging middleware for Gin.
 // It is inspired by the original logging routine from the
