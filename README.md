@@ -33,6 +33,10 @@ way of storing data in an InfluxDB database.
 * `func ConnectAPI(conf *ConnectionConf, errListen <-chan error) *InfluxDBAdapter`
 * `func RunWriteConsumerSync[T Influxable](db *InfluxDBAdapter, measurement string, incomingData <-chan T)`
 
+### logging
+
+Logging helper functions (e.g. a middleware for the Gin framework)
+
 ### mail
 
 The `mail` package contains functions for sending e-mails with simplicity in mind.
@@ -43,6 +47,12 @@ TLS and authentication is supported.
 The `strnum` package contains functions for converting between numbers, slices of
 numbers etc. to strings (and in reverse).
 
+### unireq
+
+The `unireq` package contains helper functions for working with an HTTP request.
+
+* `func CheckSuperfluousURLArgs(req *http.Request, allowedArgs []string)`
+* `func ClientIP(req *http.Request) net.IP`
 
 ### uniresp
 
