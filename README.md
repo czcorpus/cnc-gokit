@@ -35,12 +35,14 @@ way of storing data in an InfluxDB database.
 
 ### logging
 
+
 The `logging` package contains functions for a service logging setup based
 on ZeroLog.
 
 * `type LogLevel string`
 * `func SetupLogging(path string, level LogLevel)`
 * `func GinMiddleware() gin.HandlerFunc`
+
 
 ### mail
 
@@ -52,6 +54,12 @@ TLS and authentication is supported.
 The `strnum` package contains functions for converting between numbers, slices of
 numbers etc. to strings (and in reverse).
 
+### unireq
+
+The `unireq` package contains helper functions for working with an HTTP request.
+
+* `func CheckSuperfluousURLArgs(req *http.Request, allowedArgs []string)`
+* `func ClientIP(req *http.Request) net.IP`
 
 ### uniresp
 
