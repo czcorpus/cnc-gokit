@@ -16,7 +16,9 @@
 
 package collections
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // CircularList is a structure allowing infinite appending of new items
 // while rewriting the oldest (in terms of order of respective Append()
@@ -52,6 +54,20 @@ func (clist *CircularList[T]) Head() T {
 		panic("calling Head() on an empty CircularList")
 	}
 	idx := (clist.nextIdx + clist.numUnused) % len(clist.items)
+	return clist.items[idx]
+}
+
+// Last returns the most recent item of the list. In case the list
+// is empty, panic() is caused.
+func (clist *CircularList[T]) Last() T {
+	if clist.Len() == 0 {
+		panic("calling Last() on an empty CircularList")
+	}
+	idx := (clist.nextIdx - 1) % len(clist.items)
+	fmt.Println("idx = ", idx)
+	if idx < 0 {
+		idx = len(clist.items) + idx
+	}
 	return clist.items[idx]
 }
 
