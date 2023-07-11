@@ -71,6 +71,27 @@ func TestHeadPanicsOnEmpty(t *testing.T) {
 	})
 }
 
+func TestLast(t *testing.T) {
+	clist := NewCircularList[string](3)
+	clist.Append("A")
+	assert.Equal(t, "A", clist.Last())
+	clist.Append("B")
+	assert.Equal(t, "B", clist.Last())
+	clist.Append("C")
+	assert.Equal(t, "C", clist.Last())
+	clist.Append("D")
+	assert.Equal(t, "D", clist.Last())
+	clist.Append("E")
+	assert.Equal(t, "E", clist.Last())
+}
+
+func TestLastPanicsOnEmpty(t *testing.T) {
+	clist := NewCircularList[int](3)
+	assert.Panics(t, func() {
+		clist.Last()
+	})
+}
+
 type record struct {
 	name    string
 	created int
