@@ -12,6 +12,7 @@ For a documentation please see https://pkg.go.dev/github.com/czcorpus/cnc-gokit
 
 ### collections
 
+- `CircularList`
 - `ConcurrentMap`
 - `MultiDict`
 - `Set`
