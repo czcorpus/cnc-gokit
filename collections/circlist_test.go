@@ -118,8 +118,21 @@ func TestShiftUntil(t *testing.T) {
 
 func TestShiftUntilOnEmpty(t *testing.T) {
 	clist := NewCircularList[record](5)
-	assert.Panics(t, func() {
+	assert.NotPanics(t, func() {
 		clist.ShiftUntil(func(item record) bool {
+			return true
+		})
+	})
+}
+
+func TestShiftUntilTooGreedy(t *testing.T) {
+	clist := NewCircularList[string](4)
+	clist.Append("action1")
+	clist.Append("action2")
+	clist.Append("action3")
+	clist.Append("action4")
+	assert.NotPanics(t, func() {
+		clist.ShiftUntil(func(item string) bool {
 			return true
 		})
 	})

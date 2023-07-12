@@ -73,11 +73,19 @@ func (clist *CircularList[T]) Last() T {
 
 // ShiftUntil removes old items starting from the oldest one
 // and moving towards newer ones until 'fn' returns true.
+// In case there are no more items to remove, the function
+// will handle this gracefully without errors.
 // This can be used to e.g. clean old log records.
 func (clist *CircularList[T]) ShiftUntil(fn func(item T) bool) {
+	if clist.Len() == 0 {
+		return
+	}
 	pred := fn(clist.Head())
 	for pred {
 		clist.numUnused++
+		if clist.Len() == 0 {
+			return
+		}
 		pred = fn(clist.Head())
 	}
 }
