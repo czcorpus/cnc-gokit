@@ -64,11 +64,17 @@ func GetFileMtime(filePath string) (time.Time, error) {
 }
 
 // IsDir tests whether a provided path represents
-// a directory. If not or in case of an IO error,
-// false is returned along with the error
+// a directory. If not, which means either the
+// path does not exist at all or it is a non-directory
+// path, false is returned along with nil error. Non-nil
+// error should be expected only in case the function
+// fails to obtain required info (e.g. due to permissions)
 func IsDir(path string) (bool, error) {
 	fileInfo, err := os.Stat(path)
-	if err != nil {
+	if os.IsNotExist(err) {
+		return false, nil
+
+	} else if err != nil {
 		return false, err
 	}
 	return fileInfo.IsDir(), nil
