@@ -65,3 +65,8 @@ The `unireq` package contains helper functions for working with an HTTP request.
 ### uniresp
 
 The `uniresp` package contains functions usable for writing HTTP JSON responses.
+
+### util
+
+* `Max`
+* `Min`
