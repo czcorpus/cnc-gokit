@@ -17,6 +17,7 @@
 package collections
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -48,6 +49,50 @@ func TestAddMoreThanCapacity(t *testing.T) {
 	assert.Equal(t, "D", clist.Get(1))
 	assert.Equal(t, "E", clist.Get(2))
 	assert.Equal(t, 3, clist.Len())
+}
+
+func TestPrependOnNonFull(t *testing.T) {
+	clist := NewCircularList[string](3)
+	clist.Append("B")
+	clist.Append("C")
+	clist.Prepend("A")
+	assert.Equal(t, "B", clist.items[1])
+	assert.Equal(t, "C", clist.items[2])
+	assert.Equal(t, "A", clist.items[0])
+}
+
+func TestPrependOnFull(t *testing.T) {
+	clist := NewCircularList[string](3)
+	clist.Append("A")
+	clist.Append("B")
+	clist.Append("C")
+	clist.Prepend("D")
+	assert.Equal(t, "A", clist.items[0]) // TODO the following 3 items are too low-level
+	assert.Equal(t, "B", clist.items[1])
+	assert.Equal(t, "D", clist.items[2])
+	assert.Equal(t, "D", clist.Last())
+	assert.Equal(t, "A", clist.Head())
+}
+
+func TestPrependOnEmpty(t *testing.T) {
+	clist := NewCircularList[string](3)
+	clist.Prepend("X")
+	assert.Equal(t, "X", clist.Head())
+	assert.Equal(t, "X", clist.Last())
+}
+
+func TestAppendWithPrepend(t *testing.T) {
+	clist := NewCircularList[string](3)
+	clist.Append("A")
+	clist.Append("B")
+	clist.Append("C")
+	fmt.Println("next ", clist.nextIdx)
+	clist.Prepend("D")
+	fmt.Println("next ", clist.nextIdx)
+	clist.Append("E")
+	fmt.Println("next ", clist.nextIdx)
+	assert.Equal(t, "B", clist.Head())
+	assert.Equal(t, "E", clist.Last())
 }
 
 func TestHead(t *testing.T) {
