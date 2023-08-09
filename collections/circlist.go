@@ -47,6 +47,21 @@ func (clist *CircularList[T]) Append(v T) {
 	}
 }
 
+func (clist *CircularList[T]) Prepend(v T) {
+	if clist.numUnused == 0 {
+		idx := (len(clist.items) + clist.nextIdx - 1) % len(clist.items)
+		clist.items[idx] = v
+
+	} else {
+		for i := clist.nextIdx; i > 0; i-- {
+			clist.items[i] = clist.items[i-1]
+		}
+		clist.items[0] = v
+		clist.numUnused--
+		clist.nextIdx++
+	}
+}
+
 // Head returns the oldest item of the list. In case the list
 // is empty, panic() is caused.
 func (clist *CircularList[T]) Head() T {
@@ -64,7 +79,6 @@ func (clist *CircularList[T]) Last() T {
 		panic("calling Last() on an empty CircularList")
 	}
 	idx := (clist.nextIdx - 1) % len(clist.items)
-	fmt.Println("idx = ", idx)
 	if idx < 0 {
 		idx = len(clist.items) + idx
 	}
