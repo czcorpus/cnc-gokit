@@ -15,20 +15,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package util
+package maths
 
-import "github.com/czcorpus/cnc-gokit/maths"
+import (
+	"testing"
 
-// Max provides a maximum value out of the ones provided
-//
-// Deprecated: use `maths.Max` instead
-func Max[T maths.EssentialNumTypes](v1 ...T) T {
-	return maths.Max[T](v1...)
-}
+	"github.com/stretchr/testify/assert"
+)
 
-// Min provides a minimum value out of the ones provided
-//
-// Deprecated: use `maths.Min` instead
-func Min[T maths.EssentialNumTypes](v1 ...T) T {
-	return maths.Min[T](v1...)
+func TestRoundToN(t *testing.T) {
+
+	assert.Equal(t, 3.279, RoundToN(3.2789, 3))
+	assert.Equal(t, 0.1079, RoundToN(0.1079, 4))
+	assert.Equal(t, 4.0, RoundToN(3.6, 0))
+
+	assert.Equal(t, float32(3.279), RoundToN(float32(3.2789), 3))
+	assert.Equal(t, float32(0.1079), RoundToN(float32(0.1079), 4))
+	assert.Equal(t, float32(4.0), RoundToN(float32(3.6), 0))
 }

@@ -15,20 +15,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package util
+package maths
 
-import "github.com/czcorpus/cnc-gokit/maths"
+import "math"
 
-// Max provides a maximum value out of the ones provided
-//
-// Deprecated: use `maths.Max` instead
-func Max[T maths.EssentialNumTypes](v1 ...T) T {
-	return maths.Max[T](v1...)
+type floats interface {
+	float32 | float64
 }
 
-// Min provides a minimum value out of the ones provided
-//
-// Deprecated: use `maths.Min` instead
-func Min[T maths.EssentialNumTypes](v1 ...T) T {
-	return maths.Min[T](v1...)
+func RoundToN[T floats](value T, places int) T {
+	multiplier := math.Pow(10, float64(places))
+	var v any = value
+	switch tv := v.(type) {
+	case float64:
+		return T(math.Round(tv*multiplier) / multiplier)
+	case float32:
+		return T(float32(math.Round(float64(tv)*multiplier) / multiplier))
+	default:
+		panic("usupported value for RoundToN")
+	}
 }

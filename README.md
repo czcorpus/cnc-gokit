@@ -50,6 +50,11 @@ on ZeroLog.
 The `mail` package contains functions for sending e-mails with simplicity in mind.
 TLS and authentication is supported.
 
+### maths
+
+The `maths` package contains few useful functions for working with
+numbers (`Max`, `Min`, `RoundToN`)
+
 ### strnum
 
 The `strnum` package contains functions for converting between numbers, slices of
