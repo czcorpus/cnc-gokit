@@ -132,9 +132,9 @@ func WriteJSONErrorResponse(w http.ResponseWriter, aerr ActionError, status int,
 		errStr = &tmp
 	}
 	jsonAns, err := json.Marshal(struct {
-		Code    int
-		Error   *string
-		Details []string
+		Code    int      `json:"code"`
+		Error   *string  `json:"error"`
+		Details []string `json:"details"`
 	}{
 		Code:    status,
 		Error:   errStr,
