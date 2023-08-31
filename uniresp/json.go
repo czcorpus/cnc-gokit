@@ -126,12 +126,20 @@ func WriteCacheableJSONResponse(w http.ResponseWriter, req *http.Request, value 
 
 // WriteJSONErrorResponse writes 'aerr' to an HTTP error response as JSON
 func WriteJSONErrorResponse(w http.ResponseWriter, aerr ActionError, status int, details ...string) {
-	ans := &ErrorResponse{
-		Code:    status,
-		Error:   &aerr,
-		Details: details,
+	var errStr *string
+	if aerr.Error() != "" {
+		tmp := aerr.Error()
+		errStr = &tmp
 	}
-	jsonAns, err := json.Marshal(ans)
+	jsonAns, err := json.Marshal(struct {
+		Code    int
+		Error   *string
+		Details []string
+	}{
+		Code:    status,
+		Error:   errStr,
+		Details: details,
+	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
