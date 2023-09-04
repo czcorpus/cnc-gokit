@@ -53,7 +53,7 @@ TLS and authentication is supported.
 ### maths
 
 The `maths` package contains few useful functions for working with
-numbers (`Max`, `Min`, `RoundToN`)
+numbers (`Max`, `Min`, `RoundToN`) and statistics (`OnlineMean`)
 
 ### strnum
 
