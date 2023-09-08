@@ -41,6 +41,22 @@ func TestTValueTwoTailErr(t *testing.T) {
 	assert.ErrorIs(t, ErrValueNotAvailable, err)
 }
 
+func TestTValueTwoTail34Goes30(t *testing.T) {
+	tv, err := TValueTwoTail(34, Significance_0_05)
+	tv2, err2 := TValueTwoTail(30, Significance_0_05)
+	assert.NoError(t, err)
+	assert.NoError(t, err2)
+	assert.True(t, tv == tv2)
+}
+
+func TestTValueTwoTail48Goes60(t *testing.T) {
+	tv, err := TValueTwoTail(51, Significance_0_05)
+	tv2, err2 := TValueTwoTail(60, Significance_0_05)
+	assert.NoError(t, err)
+	assert.NoError(t, err2)
+	assert.True(t, tv == tv2)
+}
+
 func TestTValueTwoTailLarge(t *testing.T) {
 	tv, err := TValueTwoTail(400, Significance_0_05)
 	assert.NoError(t, err)

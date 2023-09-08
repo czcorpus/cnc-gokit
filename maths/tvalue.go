@@ -28,13 +28,19 @@ func findTValue(df int, ci SignificanceLevel) (float64, error) {
 		return 0, ErrValueNotAvailable
 	}
 	col := idxMap[ci]
-	if df <= 100 {
+	if df <= 30 {
 		return tTable[df][col], nil
 	}
-	if df <= 500 {
-		return tTable[100][col], nil
+	dist := 100000.0
+	match := 0
+	for dfx := range tTable {
+		currDist := math.Abs(float64(df) - float64(dfx))
+		if currDist < dist {
+			match = dfx
+			dist = currDist
+		}
 	}
-	return tTable[1000][col], nil
+	return tTable[match][col], nil
 }
 
 // TDistribConfInterval calculates a confidence interval
