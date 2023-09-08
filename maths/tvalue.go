@@ -59,7 +59,7 @@ func TDistribConfInterval(mean, stdev float64, sampleSize int, conf Significance
 	if err != nil {
 		return 0, 0, err
 	}
-	lft := mean + tVal*stdev/math.Sqrt(float64(sampleSize))
+	lft := mean - tVal*stdev/math.Sqrt(float64(sampleSize))
 	rgt := mean + tVal*stdev/math.Sqrt(float64(sampleSize))
 	return lft, rgt, nil
 }
