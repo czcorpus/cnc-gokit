@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
 
@@ -124,7 +125,23 @@ func WriteCacheableJSONResponse(w http.ResponseWriter, req *http.Request, value 
 	}
 }
 
+// RespondWithErrorJSON is currently the preferred
+// way how to write error responses. Compared with
+// `WriteJSONErrorResponse` it accepts any type of
+// error but it is able to detect `ActionError` and
+// use it accordingly. It also attaches the error
+// to Gin's Context.
+func RespondWithErrorJSON(ctx *gin.Context, err error, status int) {
+	aerr, ok := err.(ActionError)
+	if !ok {
+		aerr = NewActionErrorFrom(err)
+	}
+	ctx.Error(aerr)
+	WriteJSONErrorResponse(ctx.Writer, aerr, status)
+}
+
 // WriteJSONErrorResponse writes 'aerr' to an HTTP error response as JSON
+// Please note that in most cases, the `RespondWithErrorJSON` is preferred.
 func WriteJSONErrorResponse(w http.ResponseWriter, aerr ActionError, status int, details ...string) {
 	var errStr *string
 	if aerr.Error() != "" {
