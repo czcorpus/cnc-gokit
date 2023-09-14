@@ -92,3 +92,15 @@ func TestSliceReduce(t *testing.T) {
 	)
 	assert.Equal(t, 80, ans)
 }
+
+func TestSliceFilter(t *testing.T) {
+	s := []int{0, 1, 2, 3, 4, 5, 6}
+	ans := SliceFilter(s, func(v int, i int) bool { return v > 4 })
+	assert.Equal(t, []int{5, 6}, ans)
+}
+
+func TestSliceFilterRetEmpty(t *testing.T) {
+	s := []int{0, 1, 2, 3, 4, 5, 6}
+	ans := SliceFilter(s, func(v int, i int) bool { return v > 6 })
+	assert.Equal(t, []int{}, ans)
+}
