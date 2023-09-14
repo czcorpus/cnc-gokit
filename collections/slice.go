@@ -49,3 +49,13 @@ func SliceReduce[T any, U any](data []T, reduceFn func(acc U, curr T, i int) U, 
 	}
 	return ans
 }
+
+func SliceFilter[T any](data []T, filterFn func(v T, i int) bool) []T {
+	ans := make([]T, 0, len(data))
+	for i, v := range data {
+		if filterFn(v, i) {
+			ans = append(ans, v)
+		}
+	}
+	return ans
+}
