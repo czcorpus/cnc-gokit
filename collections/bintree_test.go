@@ -92,6 +92,13 @@ func TestRemoveFromLFTLinkedListLike(t *testing.T) {
 	assert.Equal(t, myInt(21), bt.Get(4))
 }
 
+func TestRemoveFromEmpty(t *testing.T) {
+	var bt BinTree[myInt]
+	assert.Panics(t, func() {
+		bt.Remove(0)
+	})
+}
+
 func TestRemoveLeaf(t *testing.T) {
 	var bt BinTree[myInt]
 	bt.Add(4, 8, 10, 15, 20, 20, 21)
@@ -106,12 +113,39 @@ func TestRemoveLeaf(t *testing.T) {
 	assert.Equal(t, myInt(20), bt.Get(5))
 }
 
+func TestGetEmpty(t *testing.T) {
+	var bt BinTree[myInt]
+	assert.Panics(t, func() {
+		bt.Get(0)
+	})
+}
+
 func TestToSlice(t *testing.T) {
 	var bt BinTree[myInt]
 	// 4, 8, 10, 15, 20, 20, 21
 	bt.Add(10, 20, 8, 15, 4, 21, 20)
 	slc := bt.ToSlice()
 	assert.Equal(t, []myInt{4, 8, 10, 15, 20, 20, 21}, slc)
+}
+
+func TestToSliceLinkedListLFT(t *testing.T) {
+	var bt BinTree[myInt]
+	bt.Add(21, 20, 15, 10, 8, 4)
+	slc := bt.ToSlice()
+	assert.Equal(t, []myInt{4, 8, 10, 15, 20, 21}, slc)
+}
+
+func TestToSliceLinkedListRGT(t *testing.T) {
+	var bt BinTree[myInt]
+	bt.Add(4, 8, 10, 15, 20, 20, 21)
+	slc := bt.ToSlice()
+	assert.Equal(t, []myInt{4, 8, 10, 15, 20, 20, 21}, slc)
+}
+
+func TestToSliceEmpty(t *testing.T) {
+	var bt BinTree[myInt]
+	slc := bt.ToSlice()
+	assert.Equal(t, []myInt{}, slc)
 }
 
 func TestGetOverflow(t *testing.T) {
