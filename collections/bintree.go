@@ -107,6 +107,9 @@ func (bt *BinTree[T]) findNodeAt(idx int) *node[T] {
 }
 
 func (bt BinTree[T]) ToSlice() []T {
+	if bt.length == 0 {
+		return []T{}
+	}
 	ans := make([]T, 0, bt.length)
 	stack := []*node[T]{bt.root}
 	stack = bt.goLeftmost(bt.root, stack)
@@ -124,6 +127,9 @@ func (bt BinTree[T]) ToSlice() []T {
 }
 
 func (bt *BinTree[T]) Remove(idx int) T {
+	if bt.length == 0 {
+		panic(fmt.Sprintf("BinTree index overflow: %d (len: %d)", idx, bt.length))
+	}
 	srch := bt.findNodeAt(idx)
 	if srch == nil {
 		var zeroVal T
@@ -189,6 +195,9 @@ func (bt *BinTree[T]) Remove(idx int) T {
 // In case the index does not exist in data the function
 // panics.
 func (bt *BinTree[T]) Get(idx int) T {
+	if bt.length == 0 {
+		panic(fmt.Sprintf("BinTree index overflow: %d (len: %d)", idx, bt.length))
+	}
 	rIdx := idx
 	if idx < 0 {
 		rIdx = bt.length + idx
