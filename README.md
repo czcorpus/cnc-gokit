@@ -12,6 +12,7 @@ For a documentation please see https://pkg.go.dev/github.com/czcorpus/cnc-gokit
 
 ### collections
 
+- `BinTree`
 - `CircularList`
 - `ConcurrentMap`
 - `MultiDict`
