@@ -17,6 +17,8 @@
 package collections
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,7 +37,7 @@ func (v myInt) Compare(other Comparable) int {
 	return -1
 }
 
-func TestAdd(t *testing.T) {
+func TestBinTreeAdd(t *testing.T) {
 	var bt BinTree[myInt]
 	bt.Add(10, 20, 8, 15, 4, 21, 20)
 
@@ -50,7 +52,7 @@ func TestAdd(t *testing.T) {
 	assert.Equal(t, myInt(21), bt.Get(6))
 }
 
-func TestRemove(t *testing.T) {
+func TestBinTreeRemove(t *testing.T) {
 	var bt BinTree[myInt]
 	// 4, 8, 10, 15, 20, 20, 21
 	bt.Add(10, 20, 8, 15, 4, 21, 20)
@@ -65,7 +67,7 @@ func TestRemove(t *testing.T) {
 	assert.Equal(t, myInt(21), bt.Get(5))
 }
 
-func TestRemoveFromRGTLinkedListLike(t *testing.T) {
+func TestBinTreeRemoveFromRGTLinkedListLike(t *testing.T) {
 	var bt BinTree[myInt]
 	bt.Add(4, 8, 10, 15, 20, 20, 21)
 	x := bt.Remove(2)
@@ -79,7 +81,7 @@ func TestRemoveFromRGTLinkedListLike(t *testing.T) {
 	assert.Equal(t, myInt(21), bt.Get(5))
 }
 
-func TestRemoveFromLFTLinkedListLike(t *testing.T) {
+func TestBinTreeRemoveFromLFTLinkedListLike(t *testing.T) {
 	var bt BinTree[myInt]
 	bt.Add(21, 20, 15, 10, 8, 4)
 	x := bt.Remove(3)
@@ -92,14 +94,14 @@ func TestRemoveFromLFTLinkedListLike(t *testing.T) {
 	assert.Equal(t, myInt(21), bt.Get(4))
 }
 
-func TestRemoveFromEmpty(t *testing.T) {
+func TestBinTreeRemoveFromEmpty(t *testing.T) {
 	var bt BinTree[myInt]
 	assert.Panics(t, func() {
 		bt.Remove(0)
 	})
 }
 
-func TestRemoveLeaf(t *testing.T) {
+func TestBinTreeRemoveLeaf(t *testing.T) {
 	var bt BinTree[myInt]
 	bt.Add(4, 8, 10, 15, 20, 20, 21)
 	x := bt.Remove(6)
@@ -113,14 +115,14 @@ func TestRemoveLeaf(t *testing.T) {
 	assert.Equal(t, myInt(20), bt.Get(5))
 }
 
-func TestGetEmpty(t *testing.T) {
+func TestBinTreeGetEmpty(t *testing.T) {
 	var bt BinTree[myInt]
 	assert.Panics(t, func() {
 		bt.Get(0)
 	})
 }
 
-func TestToSlice(t *testing.T) {
+func TestBinTreeToSlice(t *testing.T) {
 	var bt BinTree[myInt]
 	// 4, 8, 10, 15, 20, 20, 21
 	bt.Add(10, 20, 8, 15, 4, 21, 20)
@@ -128,27 +130,27 @@ func TestToSlice(t *testing.T) {
 	assert.Equal(t, []myInt{4, 8, 10, 15, 20, 20, 21}, slc)
 }
 
-func TestToSliceLinkedListLFT(t *testing.T) {
+func TestBinTreeToSliceLinkedListLFT(t *testing.T) {
 	var bt BinTree[myInt]
 	bt.Add(21, 20, 15, 10, 8, 4)
 	slc := bt.ToSlice()
 	assert.Equal(t, []myInt{4, 8, 10, 15, 20, 21}, slc)
 }
 
-func TestToSliceLinkedListRGT(t *testing.T) {
+func TestBinTreeToSliceLinkedListRGT(t *testing.T) {
 	var bt BinTree[myInt]
 	bt.Add(4, 8, 10, 15, 20, 20, 21)
 	slc := bt.ToSlice()
 	assert.Equal(t, []myInt{4, 8, 10, 15, 20, 20, 21}, slc)
 }
 
-func TestToSliceEmpty(t *testing.T) {
+func TestBinTreeToSliceEmpty(t *testing.T) {
 	var bt BinTree[myInt]
 	slc := bt.ToSlice()
 	assert.Equal(t, []myInt{}, slc)
 }
 
-func TestGetOverflow(t *testing.T) {
+func TestBinTreeGetOverflow(t *testing.T) {
 	var bt BinTree[myInt]
 	bt.Add(10, 20, 8, 15)
 	assert.Panics(t, func() {
@@ -156,7 +158,7 @@ func TestGetOverflow(t *testing.T) {
 	})
 }
 
-func TestGetNegativeIndex(t *testing.T) {
+func TestBinTreeGetNegativeIndex(t *testing.T) {
 	var bt BinTree[myInt]
 	bt.Add(10, 20, 8, 15)
 	// 8, 10, 15, 20
@@ -166,11 +168,38 @@ func TestGetNegativeIndex(t *testing.T) {
 	assert.Equal(t, myInt(8), bt.Get(-4))
 }
 
-func TestGetNegativeIndexOverflow(t *testing.T) {
+func TestBinTreeGetNegativeIndexOverflow(t *testing.T) {
 	var bt BinTree[myInt]
 	bt.Add(10, 20, 8, 15)
 	// 8, 10, 15, 20
 	assert.Panics(t, func() {
 		bt.Get(-5)
 	})
+}
+
+func TestBinTreeForEach(t *testing.T) {
+	var bt BinTree[myInt]
+	bt.Add(237, 30, 10, 430, 1, 147, 128, 12)
+	// 1, 10, 12, 30, 128, 147, 237, 430
+	ans := strings.Builder{}
+	bt.ForEach(func(i int, v myInt) bool {
+		if i > 6 {
+			return false
+		}
+		ans.WriteString(fmt.Sprintf("%d:%d|", i, v))
+		return true
+	})
+	assert.Equal(t, "0:1|1:10|2:12|3:30|4:128|5:147|6:237|", ans.String())
+}
+
+func TestBinTreeForEachOnEmpty(t *testing.T) {
+	var bt BinTree[myInt]
+	var tst bool
+	assert.NotPanics(t, func() {
+		bt.ForEach(func(i int, v myInt) bool {
+			tst = true
+			return true
+		})
+	})
+	assert.False(t, tst)
 }
