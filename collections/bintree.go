@@ -213,3 +213,26 @@ func (bt *BinTree[T]) Get(idx int) T {
 func (bt *BinTree[T]) Len() int {
 	return bt.length
 }
+
+func (bt *BinTree[T]) ForEach(fn func(i int, v T) bool) {
+	if bt.length == 0 {
+		return
+	}
+	stack := []*node[T]{bt.root}
+	stack = bt.goLeftmost(bt.root, stack)
+	var i int
+	for len(stack) > 0 {
+		node := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		if !fn(i, node.value.(T)) {
+			break
+		}
+		i++
+
+		if node.rgt != nil {
+			stack = append(stack, node.rgt)
+			stack = bt.goLeftmost(node.rgt, stack)
+		}
+	}
+}
