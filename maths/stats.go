@@ -17,7 +17,10 @@
 
 package maths
 
-import "errors"
+import (
+	"errors"
+	"math"
+)
 
 const (
 	Significance_1_00  SignificanceLevel = "1.00"
@@ -95,4 +98,48 @@ var (
 	ErrValueNotAvailable = errors.New("t-value not available for provided degrees of freedom")
 
 	ErrUnsupportedSignifLevel = errors.New("unsupported significance level")
+
+	ErrTooSmallDataset = errors.New("too small dataset")
 )
+
+type Ordered[T any] interface {
+	Get(idx int) T
+	Len() int
+}
+
+type FreqInfo interface {
+	Freq() int
+}
+
+type Quartiles struct {
+	Q1Idx int
+	Q1    int
+	Q2Idx int
+	Q2    int
+	Q3Idx int
+	Q3    int
+}
+
+func (q Quartiles) IQR() int {
+	return q.Q3 - q.Q1
+}
+
+// GetQuartiles calculates quartiles on an ordered and (sorted)
+// list. The function requires at least 7 items in the data.
+// Otherwise, it returns ErrTooSmallDataset
+func GetQuartiles[T FreqInfo](data Ordered[T]) (Quartiles, error) {
+	if data.Len() < 7 {
+		return Quartiles{}, ErrTooSmallDataset
+	}
+	q2Idx := math.Round(float64(data.Len())/2.0) - 1
+	q1Idx := math.Round(q2Idx / 2)
+	q3Idx := q2Idx + math.Round((float64(data.Len())-q2Idx)/2.0)
+	return Quartiles{
+		Q1Idx: int(q1Idx),
+		Q1:    data.Get(int(q1Idx)).Freq(),
+		Q2Idx: int(q2Idx),
+		Q2:    data.Get(int(q2Idx)).Freq(),
+		Q3Idx: int(q3Idx),
+		Q3:    data.Get(int(q3Idx)).Freq(),
+	}, nil
+}
