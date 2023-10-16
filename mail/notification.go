@@ -18,6 +18,7 @@ package mail
 import (
 	"bytes"
 	"fmt"
+	"html"
 	"strings"
 	"time"
 
@@ -55,10 +56,43 @@ type Notification struct {
 	Paragraphs []string
 }
 
+type FormattedNotification struct {
+	Subject string
+	Divs    []string
+}
+
+type EmailNotificationMessage interface {
+	Notification | FormattedNotification
+}
+
+func mkParBody(not Notification) string {
+	b := strings.Builder{}
+	for _, p := range not.Paragraphs {
+		b.WriteString("<p>" + html.EscapeString(p) + "</p>\r\n\r\n")
+	}
+	return b.String()
+}
+
+func mkDivBody(msg FormattedNotification) string {
+	b := strings.Builder{}
+	for _, div := range msg.Divs {
+		b.WriteString("<div>" + html.EscapeString(div) + "</div>\r\n\r\n")
+	}
+	return b.String()
+}
+
+// AsParagraph escapes `text` and wraps it into <p> and </p>
+func AsParagraph(text string, style string) string {
+	if style != "" {
+		return fmt.Sprintf("<p style=\"%s\">%s</p>", style, html.EscapeString(text))
+	}
+	return "<p>" + html.EscapeString(text) + "</p>"
+}
+
 // SendNotification sends a general e-mail notification.
 // Based on configuration, it is able to use SMTP servers
 // requiring TLS and authentication (see Dial()).
-func SendNotification(conf *NotificationConf, location *time.Location, msg Notification) error {
+func SendNotification[T EmailNotificationMessage](conf *NotificationConf, location *time.Location, msg T) error {
 	client, err := DialServer(conf.SMTPServer, conf.SMTPUsername, conf.SMTPPassword)
 	if err != nil {
 		return err
@@ -76,23 +110,33 @@ func SendNotification(conf *NotificationConf, location *time.Location, msg Notif
 	}
 	defer wc.Close()
 
+	var aMsg any = msg
+	var subj, msgBody string
+	switch tMsg := aMsg.(type) {
+	case FormattedNotification:
+		subj = tMsg.Subject
+		msgBody = mkDivBody(tMsg)
+	case Notification:
+		subj = tMsg.Subject
+		msgBody = mkParBody(tMsg)
+	}
+
 	headers := make(map[string]string)
 	headers["From"] = conf.Sender
 	headers["To"] = strings.Join(conf.Recipients, ",")
-	headers["Subject"] = msg.Subject
+	headers["Subject"] = subj
 	headers["MIME-Version"] = "1.0"
 	headers["Content-Type"] = "text/html; charset=UTF-8"
 
-	body := ""
+	body := strings.Builder{}
 	for k, v := range headers {
-		body += fmt.Sprintf("%s: %s\r\n", k, v)
+		body.WriteString(fmt.Sprintf("%s: %s\r\n", k, v))
 	}
-	for _, par := range msg.Paragraphs {
-		body += "<p>" + par + "</p>\r\n\r\n"
-	}
-	body += fmt.Sprintf("<p>Generated at %s</p>\r\n\r\n", datetime.GetCurrentDatetimeIn(location))
+	body.WriteString("\r\n")
+	body.WriteString(msgBody)
+	body.WriteString(fmt.Sprintf("<p>Generated at %s</p>\r\n\r\n", datetime.GetCurrentDatetimeIn(location)))
 
-	buf := bytes.NewBufferString(body)
+	buf := bytes.NewBufferString(body.String())
 	_, err = buf.WriteTo(wc)
 	return err
 }
