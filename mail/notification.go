@@ -50,12 +50,16 @@ func (nc NotificationConf) WithRecipients(r ...string) NotificationConf {
 }
 
 // Notification represents a general notification e-mail
-// subject and body.
+// subject and body. The contents of `Paragraphs`
+// is always escaped by the notification function.
+// (for raw HTML formatted notifications, use `FormattedNotification`)
 type Notification struct {
 	Subject    string
 	Paragraphs []string
 }
 
+// FormattedNotification allows sending raw html message
+// (i.e. nothing is HTMP escaped)
 type FormattedNotification struct {
 	Subject string
 	Divs    []string
@@ -76,7 +80,7 @@ func mkParBody(not Notification) string {
 func mkDivBody(msg FormattedNotification) string {
 	b := strings.Builder{}
 	for _, div := range msg.Divs {
-		b.WriteString("<div>" + html.EscapeString(div) + "</div>\r\n\r\n")
+		b.WriteString("<div>" + div + "</div>\r\n\r\n")
 	}
 	return b.String()
 }
