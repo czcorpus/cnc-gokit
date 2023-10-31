@@ -72,6 +72,10 @@ func (set *Set[T]) Union(other Set[T]) *Set[T] {
 	return ans
 }
 
+func (set *Set[T]) Size() int {
+	return len(set.data)
+}
+
 func NewSet[T constraints.Ordered](values ...T) *Set[T] {
 	ans := Set[T]{data: make(map[T]bool)}
 	for _, v := range values {
