@@ -115,3 +115,20 @@ func TestConcurrentMapJSONSerialization(t *testing.T) {
 	assert.True(t, strings.Contains(src2, `"bar":20`))
 	assert.True(t, strings.Contains(src2, `"foo":10`))
 }
+
+func TestConcurrentMapFilter(t *testing.T) {
+	v := NewConcurrentMapFrom[string, int](map[string]int{
+		"foo": 1,
+		"bar": 2,
+		"baz": 3,
+		"faz": 4,
+		"fuz": 5,
+	})
+	v = v.Filter(func(k string, v int) bool {
+		return k[0] == 'f'
+	})
+	assert.Equal(t, 1, v.Get("foo"))
+	assert.Equal(t, 4, v.Get("faz"))
+	assert.Equal(t, 5, v.Get("fuz"))
+	assert.Equal(t, 3, v.Len())
+}

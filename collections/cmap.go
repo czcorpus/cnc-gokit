@@ -117,6 +117,16 @@ func (cm *ConcurrentMap[K, T]) Len() int {
 	return len(cm.data)
 }
 
+func (cm *ConcurrentMap[K, T]) Filter(fn func(k K, v T) bool) *ConcurrentMap[K, T] {
+	ans := make(map[K]T)
+	for kx, vx := range cm.data {
+		if fn(kx, vx) {
+			ans[kx] = vx
+		}
+	}
+	return NewConcurrentMapFrom(ans)
+}
+
 func (cm *ConcurrentMap[K, T]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(cm.AsMap())
 }
