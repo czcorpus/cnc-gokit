@@ -26,20 +26,30 @@ type Set[T constraints.Ordered] struct {
 	data map[T]bool
 }
 
+func (set *Set[T]) testAndInit() {
+	if set.data == nil {
+		set.data = make(map[T]bool)
+	}
+}
+
 func (set *Set[T]) Add(value T) {
+	set.testAndInit()
 	set.data[value] = true
 }
 
 func (set *Set[T]) Remove(value T) {
+	set.testAndInit()
 	delete(set.data, value)
 }
 
 func (set *Set[T]) Contains(value T) bool {
+	set.testAndInit()
 	_, ok := set.data[value]
 	return ok
 }
 
 func (set *Set[T]) ToSlice() []T {
+	set.testAndInit()
 	ans := make([]T, 0, len(set.data))
 	for k := range set.data {
 		ans = append(ans, k)
@@ -65,6 +75,7 @@ func (set *Set[T]) ForEach(fn func(item T)) {
 }
 
 func (set *Set[T]) Union(other Set[T]) *Set[T] {
+	set.testAndInit()
 	ans := NewSet(set.ToSlice()...)
 	other.ForEach(func(item T) {
 		ans.Add(item)
