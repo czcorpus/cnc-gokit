@@ -119,11 +119,13 @@ func (cm *ConcurrentMap[K, T]) Len() int {
 
 func (cm *ConcurrentMap[K, T]) Filter(fn func(k K, v T) bool) *ConcurrentMap[K, T] {
 	ans := make(map[K]T)
+	cm.RLock()
 	for kx, vx := range cm.data {
 		if fn(kx, vx) {
 			ans[kx] = vx
 		}
 	}
+	cm.RUnlock()
 	return NewConcurrentMapFrom(ans)
 }
 
