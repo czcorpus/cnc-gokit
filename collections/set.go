@@ -87,6 +87,26 @@ func (set *Set[T]) Size() int {
 	return len(set.data)
 }
 
+func (set *Set[T]) Sub(other *Set[T]) *Set[T] {
+	set.testAndInit()
+	ans := NewSet(set.ToSlice()...)
+	other.ForEach(func(item T) {
+		ans.Remove(item)
+	})
+	return ans
+}
+
+func (set *Set[T]) Intersect(other *Set[T]) *Set[T] {
+	set.testAndInit()
+	ans := NewSet([]T{}...)
+	other.ForEach(func(item T) {
+		if set.Contains(item) {
+			ans.Add(item)
+		}
+	})
+	return ans
+}
+
 func NewSet[T constraints.Ordered](values ...T) *Set[T] {
 	ans := Set[T]{data: make(map[T]bool)}
 	for _, v := range values {
