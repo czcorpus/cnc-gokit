@@ -83,3 +83,78 @@ func TestSetForEach(t *testing.T) {
 	assert.True(t, tst["3"])
 	assert.Equal(t, 3, len(tst))
 }
+
+func TestSetSubFromEmptySet(t *testing.T) {
+	s0 := Set[string]{}
+	s1 := Set[string]{}
+	s1.Add("1")
+	s1.Add("2")
+	s1.Add("3")
+	s01 := s0.Sub(&s1)
+	assert.Equal(t, 0, s01.Size())
+}
+
+func TestSetSubOfEmptySet(t *testing.T) {
+	s0 := Set[string]{}
+	s1 := Set[string]{}
+	s1.Add("1")
+	s1.Add("2")
+	s1.Add("3")
+	s10 := s1.Sub(&s0)
+	assert.True(t, s10.Contains("1"))
+	assert.True(t, s10.Contains("2"))
+	assert.True(t, s10.Contains("3"))
+	assert.Equal(t, 3, s10.Size())
+}
+
+func TestSetSub(t *testing.T) {
+	s1 := Set[string]{}
+	s1.Add("1")
+	s1.Add("2")
+	s1.Add("3")
+	s2 := Set[string]{}
+	s2.Add("2")
+	s2.Add("3")
+	s2.Add("4")
+	s12 := s1.Sub(&s2)
+	assert.True(t, s12.Contains("1"))
+	assert.False(t, s12.Contains("2"))
+	assert.False(t, s12.Contains("3"))
+	assert.Equal(t, 1, s12.Size())
+}
+
+func TestSetIntersectOfEmptySet(t *testing.T) {
+	s0 := Set[string]{}
+	s1 := Set[string]{}
+	s1.Add("1")
+	s1.Add("2")
+	s1.Add("3")
+	s10 := s1.Intersect(&s0)
+	assert.Equal(t, 0, s10.Size())
+}
+
+func TestSetIntersectFromEmptySet(t *testing.T) {
+	s0 := Set[string]{}
+	s1 := Set[string]{}
+	s1.Add("1")
+	s1.Add("2")
+	s1.Add("3")
+	s01 := s0.Intersect(&s1)
+	assert.Equal(t, 0, s01.Size())
+}
+
+func TestSetIntersect(t *testing.T) {
+	s1 := Set[string]{}
+	s1.Add("1")
+	s1.Add("2")
+	s1.Add("3")
+	s2 := Set[string]{}
+	s2.Add("2")
+	s2.Add("3")
+	s2.Add("4")
+	s12 := s1.Intersect(&s2)
+	assert.False(t, s12.Contains("1"))
+	assert.True(t, s12.Contains("2"))
+	assert.True(t, s12.Contains("3"))
+	assert.Equal(t, 2, s12.Size())
+}
