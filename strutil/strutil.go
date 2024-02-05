@@ -20,7 +20,10 @@ import "unicode/utf8"
 
 // SmartTruncate truncates an input string so it does
 // not exceed maxSize while respecting the "space"
-// character
+// character.
+// In case the resulting string is less than 20% of
+// the original, an alternative "non-smart" cut
+// is performed.
 func SmartTruncate(inStr string, maxSize int) string {
 	if maxSize < 0 {
 		panic("negative maxSize")
@@ -41,7 +44,8 @@ func SmartTruncate(inStr string, maxSize int) string {
 			prevSpace = i
 		}
 	}
-	if prevSpace > 0 {
+	ans := []rune(inStr)[:prevSpace]
+	if prevSpace > 0 && float64(len(ans)) > 0.2*float64(len([]rune(inStr))) {
 		return string([]rune(inStr)[:prevSpace]) + "\u2026"
 	}
 	return string([]rune(inStr)[:maxSize]) + "\u2026"

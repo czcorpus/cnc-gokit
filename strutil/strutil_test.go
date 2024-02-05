@@ -57,3 +57,8 @@ func TestSmartTruncateNegativeLimit(t *testing.T) {
 		SmartTruncate("012 34 567 8 9", -5)
 	})
 }
+
+func TestSmartTruncateTooSmallSmartSubstr(t *testing.T) {
+	s2 := SmartTruncate("012 3456789abcdef", 8)
+	assert.Equal(t, "012 3456\u2026", s2)
+}
