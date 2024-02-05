@@ -25,6 +25,9 @@ func SmartTruncate(inStr string, maxSize int) string {
 	if maxSize < 0 {
 		panic("negative maxSize")
 	}
+	if maxSize == 0 {
+		return ""
+	}
 	sLength := utf8.RuneCountInString(inStr)
 	if sLength < maxSize {
 		return inStr
@@ -39,7 +42,7 @@ func SmartTruncate(inStr string, maxSize int) string {
 		}
 	}
 	if prevSpace > 0 {
-		return string([]rune(inStr)[:prevSpace])
+		return string([]rune(inStr)[:prevSpace]) + "\u2026"
 	}
-	return string([]rune(inStr)[:maxSize])
+	return string([]rune(inStr)[:maxSize]) + "\u2026"
 }
