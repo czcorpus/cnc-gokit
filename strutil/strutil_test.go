@@ -24,17 +24,17 @@ import (
 
 func TestSmartTruncateNoSpaceInput(t *testing.T) {
 	s2 := SmartTruncate("0123456789", 5)
-	assert.Equal(t, "01234", s2)
+	assert.Equal(t, "01234\u2026", s2)
 }
 
 func TestSmartTruncateShorterResult(t *testing.T) {
 	s2 := SmartTruncate("012 34 567 8 9", 9)
-	assert.Equal(t, "012 34", s2)
+	assert.Equal(t, "012 34\u2026", s2)
 }
 
 func TestSmartTruncateExactResult(t *testing.T) {
 	s2 := SmartTruncate("012 34 567 8 9", 11)
-	assert.Equal(t, "012 34 567", s2)
+	assert.Equal(t, "012 34 567\u2026", s2)
 }
 
 func TestSmartTruncateEmpty(t *testing.T) {
