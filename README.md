@@ -27,6 +27,10 @@ For a documentation please see https://pkg.go.dev/github.com/czcorpus/cnc-gokit
 The `fs` package contains miscellaneous functions for dealing with
 filesystems (obtaining file information, testing existence,...).
 
+### httpclient
+
+* `New(opts...)`
+
 ### influx
 
 The `influx` serves as a wrapper for the InfluxDB client v2 offering a convenient
@@ -60,6 +64,12 @@ numbers (`Max`, `Min`, `RoundToN`) and statistics (`OnlineMean`)
 
 The `strnum` package contains functions for converting between numbers, slices of
 numbers etc. to strings (and in reverse).
+
+### strutil
+
+String utilities.
+
+* `func SmartTruncate(inStr string, maxSize int) string`
 
 ### unireq
 
