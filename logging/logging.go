@@ -18,6 +18,7 @@ package logging
 
 import (
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -93,14 +94,20 @@ func GinMiddleware() gin.HandlerFunc {
 			logEvent = log.Info()
 		}
 		t0 := time.Now()
-		logEvent.
+		logEvent = logEvent.
 			Float64("latency", t0.Sub(start).Seconds()).
 			Str("clientIP", ctx.ClientIP()).
 			Str("method", ctx.Request.Method).
 			Int("status", ctx.Writer.Status()).
 			Str("errorMessage", ctx.Errors.ByType(gin.ErrorTypePrivate).String()).
 			Int("bodySize", ctx.Writer.Size()).
-			Str("path", path).
-			Send()
+			Str("path", path)
+
+		for k, v := range ctx.Keys {
+			if strings.HasPrefix("logEvent_", k) {
+				logEvent = logEvent.Any(k[9:], v)
+			}
+		}
+		logEvent.Send()
 	}
 }
