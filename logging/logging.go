@@ -26,6 +26,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	logEventPrefix = "logEvent_"
+)
+
 var (
 	levelMapping = map[LogLevel]zerolog.Level{
 		"debug":   zerolog.DebugLevel,
@@ -104,10 +108,14 @@ func GinMiddleware() gin.HandlerFunc {
 			Str("path", path)
 
 		for k, v := range ctx.Keys {
-			if strings.HasPrefix("logEvent_", k) {
-				logEvent = logEvent.Any(k[9:], v)
+			if strings.HasPrefix(k, logEventPrefix) {
+				logEvent = logEvent.Any(k[len(logEventPrefix):], v)
 			}
 		}
 		logEvent.Send()
 	}
+}
+
+func AddLogEvent(ctx *gin.Context, key string, value any) {
+	ctx.Set(logEventPrefix+key, value)
 }
