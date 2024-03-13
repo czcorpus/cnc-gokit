@@ -105,6 +105,7 @@ func GinMiddleware() gin.HandlerFunc {
 			Int("status", ctx.Writer.Status()).
 			Str("errorMessage", ctx.Errors.ByType(gin.ErrorTypePrivate).String()).
 			Int("bodySize", ctx.Writer.Size()).
+			Str("userAgent", ctx.Request.UserAgent()).
 			Str("path", path)
 
 		for k, v := range ctx.Keys {
@@ -116,6 +117,12 @@ func GinMiddleware() gin.HandlerFunc {
 	}
 }
 
-func AddLogEvent(ctx *gin.Context, key string, value any) {
+func AddCustomEntry(ctx *gin.Context, key string, value any) {
 	ctx.Set(logEventPrefix+key, value)
+}
+
+// AddLogEvent
+// Deprecated: please use `AddCustomEntry` instead
+func AddLogEvent(ctx *gin.Context, key string, value any) {
+	AddCustomEntry(ctx, key, value)
 }
