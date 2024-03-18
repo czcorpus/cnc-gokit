@@ -16,6 +16,8 @@
 
 package collections
 
+import "math/rand"
+
 func SliceContains[T comparable](data []T, value T) bool {
 	for _, v := range data {
 		if v == value {
@@ -58,4 +60,12 @@ func SliceFilter[T any](data []T, filterFn func(v T, i int) bool) []T {
 		}
 	}
 	return ans
+}
+
+// SliceShuffle shuffles a slice in place
+func SliceShuffle[T any](data []T) {
+	for i := 0; i < len(data); i++ {
+		j := rand.Intn(i + 1)
+		data[i], data[j] = data[j], data[i]
+	}
 }
