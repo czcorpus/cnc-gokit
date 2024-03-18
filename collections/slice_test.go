@@ -104,3 +104,36 @@ func TestSliceFilterRetEmpty(t *testing.T) {
 	ans := SliceFilter(s, func(v int, i int) bool { return v > 6 })
 	assert.Equal(t, []int{}, ans)
 }
+
+// TestSliceShuffle
+// note: Due to randomness in the function, we
+// just test whether any position of the tested
+// slice does not exhibit too different behavior
+func TestSliceShuffle(t *testing.T) {
+	results := make([][]int, 0, 10000)
+
+	genShuffle := func() []int {
+		s := []int{0, 1, 2, 3, 4, 5, 6, 7}
+		SliceShuffle(s)
+		return s
+	}
+
+	for i := 0; i < 10000; i++ {
+		results = append(results, genShuffle())
+	}
+
+	sums := make(map[int]int)
+	for i := 0; i < 10000; i++ {
+		for j := 0; j < 8; j++ {
+			sums[j] += results[i][j]
+		}
+	}
+	var avg int
+	for _, v := range sums {
+		avg += v
+	}
+	avg /= len(sums)
+	for _, v := range sums {
+		assert.InDelta(t, avg, v, 1000)
+	}
+}
