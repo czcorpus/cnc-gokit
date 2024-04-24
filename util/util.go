@@ -32,3 +32,16 @@ func Max[T maths.EssentialNumTypes](v1 ...T) T {
 func Min[T maths.EssentialNumTypes](v1 ...T) T {
 	return maths.Min[T](v1...)
 }
+
+// Or returns first non-zero item out of provides ones.
+// If no argument is non-zero, it returns the zero value.
+// Note: this is backported from go 1.22
+func Or[T comparable](vals ...T) T {
+	var zero T
+	for _, val := range vals {
+		if val != zero {
+			return val
+		}
+	}
+	return zero
+}
