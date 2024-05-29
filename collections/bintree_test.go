@@ -203,3 +203,14 @@ func TestBinTreeForEachOnEmpty(t *testing.T) {
 	})
 	assert.False(t, tst)
 }
+
+func TestUniqueSetting(t *testing.T) {
+	var bt BinTree[myInt]
+	bt.Add(2, 1, 3)
+	assert.Equal(t, []myInt{1, 2, 3}, bt.ToSlice())
+	bt.Add(1)
+	bt.UniqValues = true
+	bt.Add(2)
+	bt.Add(3)
+	assert.Equal(t, []myInt{1, 1, 2, 3}, bt.ToSlice())
+}
