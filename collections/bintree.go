@@ -42,8 +42,18 @@ func (node *node[T]) isLeaf() bool {
 type BinTree[T Comparable] struct {
 	root   *node[T]
 	length int
+
+	// UniqValues if true than the tree won't allow adding
+	// duplicate items (in terms of their `Compare` results)
+	// It can be enabled at any time during operation. The
+	// effect then starts with the next call of the Add method.
+	// The same applies for setting the value back to false.
+	UniqValues bool
 }
 
+// Add adds zero or more items to the tree.
+// Calling the function without arguments is
+// considered a no-op.
 func (bt *BinTree[T]) Add(v ...T) {
 	for _, vx := range v {
 		bt.add(vx)
@@ -59,6 +69,9 @@ func (bt *BinTree[T]) add(v T) {
 	currNode := bt.root
 	for currNode != nil {
 		cmp := v.Compare(currNode.value)
+		if bt.UniqValues && cmp == 0 {
+			return
+		}
 		if cmp <= 0 {
 			if currNode.lft == nil {
 				currNode.lft = &node[T]{value: v, parent: currNode}
