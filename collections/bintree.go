@@ -47,6 +47,7 @@ type BinTree[T Comparable] struct {
 	// duplicate items (in terms of their `Compare` results)
 	// It can be enabled at any time during operation. The
 	// effect then starts with the next call of the Add method.
+	// The same applies for setting the value back to false.
 	UniqValues bool
 }
 
