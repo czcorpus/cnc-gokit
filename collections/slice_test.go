@@ -137,3 +137,39 @@ func TestSliceShuffle(t *testing.T) {
 		assert.InDelta(t, avg, v, 1000)
 	}
 }
+
+func TestRandomSample(t *testing.T) {
+	rnd := &mockrnd{sequence: []int{3, 2, 1, 1, 4, 0, 1, 3, 2, 1}}
+	ans := sliceSample([]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, 5, rnd)
+	// -) [3]  0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+	// 0) [2]  0, 1, 2, 9, 4, 5, 6, 7, 8, 3
+	// 1) [1]  0, 1, 8, 9, 4, 5, 6, 7, 2, 3
+	// 2) [1]  0, 7, 8, 9, 4, 5, 6, 1, 2, 3
+	// 3) [4]  0, 6, 8, 9, 4, 5, 7, 1, 2, 3
+	// 4) -    0, 6, 8, 9, 5, 4, 7, 1, 2, 3
+	assert.Equal(t, []int{4, 7, 1, 2, 3}, ans)
+}
+
+func TestRandomSampleZeroSample(t *testing.T) {
+	rnd := &mockrnd{sequence: []int{3, 2, 1, 1, 4, 0, 1, 3, 2, 1}}
+	ans := sliceSample([]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, 0, rnd)
+	assert.Equal(t, []int{}, ans)
+}
+
+func TestRandomSampleTooBigSample(t *testing.T) {
+	rnd := &mockrnd{sequence: []int{3, 2, 1, 1, 4, 0, 1, 3, 2, 1}}
+	assert.Panics(t, func() {
+		sliceSample([]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, 20, rnd)
+	})
+}
+
+func TestRandomSampleMaxSample(t *testing.T) {
+	rnd := &mockrnd{sequence: []int{3, 2, 1, 1, 4, 0, 1, 3, 2, 1}}
+	ans := sliceSample([]int{0, 1, 2, 3}, 4, rnd)
+	// -) [3]  0, 1, 2, 3
+	// 0) [2]  0, 1, 2, 3
+	// 1) [1]  0, 1, 2, 3
+	// 2) [1]  0, 1, 2, 3
+	// 3)      0, 1, 2, 3
+	assert.Equal(t, []int{0, 1, 2, 3}, ans)
+}

@@ -16,7 +16,10 @@
 
 package collections
 
-import "math/rand"
+import (
+	"math/rand"
+	"time"
+)
 
 func SliceContains[T comparable](data []T, value T) bool {
 	for _, v := range data {
@@ -68,4 +71,32 @@ func SliceShuffle[T any](data []T) {
 		j := rand.Intn(i + 1)
 		data[i], data[j] = data[j], data[i]
 	}
+}
+
+type randomSource interface {
+	Intn(n int) int
+}
+
+func sliceSample[T any](data []T, sampleSize int, rnd randomSource) []T {
+	if sampleSize > len(data) {
+		panic("SliceSample - the sampleSize must be at most the length of the original data")
+	}
+	tmp := make([]T, len(data))
+	copy(tmp, data)
+	for i := 0; i < sampleSize; i++ {
+		j := rnd.Intn(len(tmp) - i)
+		tmp[len(tmp)-1-i], tmp[j] = tmp[j], tmp[len(tmp)-1-i]
+	}
+	return tmp[len(tmp)-sampleSize:]
+}
+
+// SliceSample creates a uniform sample of size given
+// by the sampleSize argument. The function allocates
+// a copy of the input data so it should be taken into
+// account when dealing with large slices.
+// Please note that the randomness used by the
+// function is not cryptographically secure.
+// A zero-size sample is accepted.
+func SliceSample[T any](data []T, sampleSize int) []T {
+	return sliceSample(data, sampleSize, rand.New(rand.NewSource(time.Now().Unix())))
 }
