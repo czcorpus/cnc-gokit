@@ -6,4 +6,4 @@ build:
 test:
 	go test ./...
 
-.PHONY: build test
+.PHONY: test

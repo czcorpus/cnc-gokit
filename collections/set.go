@@ -17,12 +17,12 @@
 package collections
 
 import (
+	"cmp"
 	"sort"
-
-	"golang.org/x/exp/constraints"
 )
 
-type Set[T constraints.Ordered] struct {
+// Set is a set implementation for ordered value types
+type Set[T cmp.Ordered] struct {
 	data map[T]bool
 }
 
@@ -107,7 +107,7 @@ func (set *Set[T]) Intersect(other *Set[T]) *Set[T] {
 	return ans
 }
 
-func NewSet[T constraints.Ordered](values ...T) *Set[T] {
+func NewSet[T cmp.Ordered](values ...T) *Set[T] {
 	ans := Set[T]{data: make(map[T]bool)}
 	for _, v := range values {
 		ans.data[v] = true
