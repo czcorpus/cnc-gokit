@@ -17,6 +17,8 @@
 package collections
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 )
 
@@ -134,10 +136,43 @@ func (clist *CircularList[T]) ForEach(fn func(i int, item T) bool) {
 	}
 }
 
+func (clist *CircularList[T]) GobEncode() ([]byte, error) {
+	var buf bytes.Buffer
+	encoder := gob.NewEncoder(&buf)
+	if err := encoder.Encode(clist.items); err != nil {
+		return []byte{}, fmt.Errorf("failed to GOB encode CircularList: %w", err)
+	}
+	if err := encoder.Encode(clist.nextIdx); err != nil {
+		return []byte{}, fmt.Errorf("failed to GOB encode CircularList: %w", err)
+	}
+	if err := encoder.Encode(clist.numUnused); err != nil {
+		return []byte{}, fmt.Errorf("failed to GOB encode CircularList: %w", err)
+	}
+	return buf.Bytes(), nil
+}
+
+func (clist *CircularList[T]) GobDecode(data []byte) error {
+	buf := bytes.NewBuffer(data)
+	decoder := gob.NewDecoder(buf)
+	if err := decoder.Decode(&clist.items); err != nil {
+		return fmt.Errorf("failed to GOB decode CircularList: %w", err)
+	}
+	if err := decoder.Decode(&clist.nextIdx); err != nil {
+		return fmt.Errorf("failed to GOB decode CircularList: %w", err)
+	}
+	if err := decoder.Decode(&clist.numUnused); err != nil {
+		return fmt.Errorf("failed to GOB decode CircularList: %w", err)
+	}
+	return nil
+}
+
 // NewCircularList is a recommended factory function
 // for CircularList.
 // The parameter `capacity` defines max. number
-// of items the instance will be able to store.
+// of items the instance will be able to store. Internally,
+// the CircularList works with slices, so the effect of the
+// capacity argument on memory is the same as in the expression
+// `make([]T, 0, capacity)`.
 func NewCircularList[T any](capacity int) *CircularList[T] {
 	return &CircularList[T]{
 		items:     make([]T, capacity),
