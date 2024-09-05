@@ -17,6 +17,8 @@
 package collections
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"testing"
 
@@ -206,4 +208,31 @@ func TestForEachOnEmpty(t *testing.T) {
 		return true
 	})
 	assert.Equal(t, 0, cnt)
+}
+
+func TestGOBEncodeDecode(t *testing.T) {
+	clist := NewCircularList[string](4)
+	clist.Append("a")
+	clist.Append("b")
+	clist.Append("c")
+	clist.Append("d")
+	origNextIdx := clist.nextIdx
+	origNumUnused := clist.numUnused
+	origItems := clist.items
+	var buf bytes.Buffer
+	encoder := gob.NewEncoder(&buf)
+	err := encoder.Encode(clist)
+	assert.NoError(t, err)
+
+	var clist2 CircularList[string]
+	buf2 := bytes.NewBuffer(buf.Bytes())
+	decoder := gob.NewDecoder(buf2)
+	err = decoder.Decode(&clist2)
+	assert.NoError(t, err)
+	assert.Equal(t, origNumUnused, clist2.numUnused)
+	assert.Equal(t, origNextIdx, clist2.nextIdx)
+	assert.Equal(t, origItems, clist2.items)
+	// following two lines are not that necessary
+	assert.Equal(t, "a", clist2.Head())
+	assert.Equal(t, "d", clist2.Last())
 }
