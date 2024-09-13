@@ -58,11 +58,28 @@ func (cm *ConcurrentMap[K, T]) Delete(k K) {
 	delete(cm.data, k)
 }
 
-func (cm *ConcurrentMap[K, T]) ForEach(fn func(k K, v T)) {
+// ForEach iterates through all the items. Due to concurrent
+// nature - to prevent possible issues and or deadlocks, the iteration
+// copies all the keys available in time the method was called and during
+// each `yield` call, it tries the obtain a corresponding
+// value - which may or may not be available.
+// The method acquires locks only for necessary operations inside so
+// it should be deadlock-resistant.
+func (cm *ConcurrentMap[K, T]) ForEach(yield func(k K, v T, ok bool)) {
+	var keys []K
 	cm.RLock()
-	defer cm.RUnlock()
-	for k, v := range cm.data {
-		fn(k, v)
+	keys = make([]K, len(cm.data))
+	var i int
+	for k := range cm.data {
+		keys[i] = k
+		i++
+	}
+	cm.RUnlock()
+	for _, k := range keys {
+		cm.RLock()
+		v, ok := cm.data[k]
+		cm.Unlock()
+		yield(k, v, ok)
 	}
 }
 
