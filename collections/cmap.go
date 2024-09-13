@@ -78,7 +78,7 @@ func (cm *ConcurrentMap[K, T]) ForEach(yield func(k K, v T, ok bool)) {
 	for _, k := range keys {
 		cm.RLock()
 		v, ok := cm.data[k]
-		cm.Unlock()
+		cm.RUnlock()
 		yield(k, v, ok)
 	}
 }

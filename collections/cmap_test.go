@@ -132,3 +132,19 @@ func TestConcurrentMapFilter(t *testing.T) {
 	assert.Equal(t, 5, v.Get("fuz"))
 	assert.Equal(t, 3, v.Len())
 }
+
+func TestForeach(t *testing.T) {
+	v := NewConcurrentMapFrom[string, int](map[string]int{
+		"foo": 1,
+		"bar": 2,
+		"baz": 3,
+		"faz": 4,
+		"fuz": 5,
+	})
+	assert.NotPanics(t, func() { // here we are testing possible locking issues
+		v.ForEach(func(k string, v int, ok bool) {
+
+		})
+	})
+
+}
