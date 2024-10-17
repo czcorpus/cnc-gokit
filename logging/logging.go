@@ -98,12 +98,15 @@ func GinMiddleware() gin.HandlerFunc {
 			logEvent = log.Info()
 		}
 		t0 := time.Now()
+		errs := ctx.Errors.ByType(gin.ErrorTypePrivate)
+		if len(errs) > 0 {
+			logEvent = logEvent.Str("errorMessage", errs.String())
+		}
 		logEvent = logEvent.
 			Float64("latency", t0.Sub(start).Seconds()).
 			Str("clientIP", ctx.ClientIP()).
 			Str("method", ctx.Request.Method).
 			Int("status", ctx.Writer.Status()).
-			Str("errorMessage", ctx.Errors.ByType(gin.ErrorTypePrivate).String()).
 			Int("bodySize", ctx.Writer.Size()).
 			Str("userAgent", ctx.Request.UserAgent()).
 			Str("path", path)
