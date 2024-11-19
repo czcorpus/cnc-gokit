@@ -22,12 +22,16 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/natefinch/lumberjack"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 const (
-	logEventPrefix = "logEvent_"
+	logEventPrefix         = "logEvent_"
+	dfltLoggingMaxFileSize = 500
+	dfltLoggingMaxFiles    = 3
+	dfltLoggingMaxAgeDays  = 28
 )
 
 var (
@@ -51,20 +55,49 @@ func (ll LogLevel) IsValid() bool {
 	return ok
 }
 
+type LoggingConf struct {
+	Path        string   `json:"path"`
+	Level       LogLevel `json:"level"`
+	MaxFileSize int      `json:"maxFileSize"`
+	MaxFiles    int      `json:"maxFiles"`
+	MaxAgeDays  int      `json:"maxAgeDays"`
+}
+
+func (conf *LoggingConf) validate() error {
+	if conf.MaxFileSize == 0 {
+		conf.MaxFileSize = dfltLoggingMaxFileSize
+		log.Warn().Msgf("missing logging.maxFileSize, setting %d", dfltLoggingMaxFileSize)
+	}
+	if conf.MaxFiles == 0 {
+		conf.MaxFiles = dfltLoggingMaxFiles
+		log.Warn().Msgf("missing logging.maxFiles, setting %d", dfltLoggingMaxFiles)
+	}
+	if conf.MaxAgeDays == 0 {
+		conf.MaxAgeDays = dfltLoggingMaxAgeDays
+		log.Warn().Msgf("missing logging.maxAgeDays, setting %d", dfltLoggingMaxAgeDays)
+	}
+	return nil
+}
+
 // SetupLogging is a common setup for different
 // CNC HTTP services.
-func SetupLogging(path string, level LogLevel) {
-	lev, ok := levelMapping[level]
+func SetupLogging(conf LoggingConf) {
+	if err := conf.validate(); err != nil {
+		log.Fatal().Err(err).Msgf("invalid config")
+	}
+	lev, ok := levelMapping[conf.Level]
 	if !ok {
-		log.Fatal().Msgf("Invalid logging level: %s", level)
+		log.Fatal().Msgf("Invalid logging level: %s", conf.Level)
 	}
 	zerolog.SetGlobalLevel(lev)
-	if path != "" {
-		logf, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			log.Fatal().Msgf("Failed to initialize log. File: %s", path)
-		}
-		log.Logger = log.Output(logf)
+	if conf.Path != "" {
+		log.Logger = log.Output(&lumberjack.Logger{
+			Filename:   conf.Path,
+			MaxSize:    conf.MaxFileSize,
+			MaxBackups: conf.MaxFiles,
+			MaxAge:     conf.MaxAgeDays,
+			Compress:   false,
+		})
 
 	} else {
 		log.Logger = log.Output(
