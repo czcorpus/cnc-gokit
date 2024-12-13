@@ -72,6 +72,12 @@ func WriteJSONResponse(w http.ResponseWriter, value any) {
 	w.Write(jsonAns)
 }
 
+// WriteRawJSONResponse writes a slice of bytes assuming it is a JSON
+// string to an HTTP response
+func WriteRawJSONResponse(w http.ResponseWriter, value []byte) {
+	w.Write(value)
+}
+
 // WriteJSONResponseWithStatus writes 'value' to an HTTP response encoded as JSON
 func WriteJSONResponseWithStatus(w http.ResponseWriter, status int, value any) {
 	jsonAns, err := json.Marshal(value)
