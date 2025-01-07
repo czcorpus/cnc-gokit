@@ -62,3 +62,27 @@ func TestSmartTruncateTooSmallSmartSubstr(t *testing.T) {
 	s2 := SmartTruncate("012 3456789abcdef", 8)
 	assert.Equal(t, "012 3456\u2026", s2)
 }
+
+type modString string
+
+func (ms modString) String() string {
+	return string(ms)
+}
+
+func TestJoinAnyTypical(t *testing.T) {
+	values := []modString{"a", "b", "c"}
+	ans := JoinAny(values, func(v modString) string { return v.String() }, ", ")
+	assert.Equal(t, "a, b, c", ans)
+}
+
+func TestJoinAnyEmpty(t *testing.T) {
+	values := []modString{}
+	ans := JoinAny(values, func(v modString) string { return v.String() }, ", ")
+	assert.Equal(t, "", ans)
+}
+
+func TestJoinAnyEmptySepar(t *testing.T) {
+	values := []modString{"a", "b", "c"}
+	ans := JoinAny(values, func(v modString) string { return v.String() }, "")
+	assert.Equal(t, "abc", ans)
+}

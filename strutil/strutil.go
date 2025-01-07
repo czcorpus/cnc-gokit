@@ -16,7 +16,10 @@
 
 package strutil
 
-import "unicode/utf8"
+import (
+	"strings"
+	"unicode/utf8"
+)
 
 // SmartTruncate truncates an input string so it does
 // not exceed maxSize while respecting the "space"
@@ -49,4 +52,17 @@ func SmartTruncate(inStr string, maxSize int) string {
 		return string([]rune(inStr)[:prevSpace]) + "\u2026"
 	}
 	return string([]rune(inStr)[:maxSize]) + "\u2026"
+}
+
+// JoinAny joins any items to a string based on mapFn which converts individual
+// items to strings.
+func JoinAny[T any](elems []T, mapFn func(v T) string, sep string) string {
+	var ans strings.Builder
+	for i := 0; i < len(elems); i++ {
+		if i > 0 {
+			ans.WriteString(sep)
+		}
+		ans.WriteString(mapFn(elems[i]))
+	}
+	return ans.String()
 }
