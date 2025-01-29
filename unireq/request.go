@@ -82,6 +82,28 @@ func GetURLIntArgOrFail(ctx *gin.Context, name string, dflt int) (int, bool) {
 	return value, true
 }
 
+// GetURLFloatArgOrFail reads a string-encoded float argument from URL query.
+// If not set, then `dflt` is returned (i.e. value not present is considered a non-error).
+// The second returned value is an "OK" flag.
+// In case of an error, the function writes a HTTP response and returns
+// false as a second argument.
+func GetURLFloatArgOrFail(ctx *gin.Context, name string, dflt float64) (float64, bool) {
+	if !ctx.Request.URL.Query().Has(name) {
+		return dflt, true
+	}
+	tmp := ctx.Request.URL.Query().Get(name)
+	value, err := strconv.ParseFloat(tmp, 32)
+	if err != nil {
+		uniresp.WriteJSONErrorResponse(
+			ctx.Writer,
+			uniresp.NewActionErrorFrom(err),
+			http.StatusUnprocessableEntity,
+		)
+		return 0, false
+	}
+	return value, true
+}
+
 // GetURLBoolArgOrFail reads a string-encoded bool argument (= '1', '0') from URL query.
 // If not set, then `dflt` is returned (i.e. value not present is considered a non-error).
 // The second returned value is an "OK" flag.

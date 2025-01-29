@@ -153,3 +153,41 @@ func TestGetURLIntArgOrFailInvalid(t *testing.T) {
 	assert.Equal(t, 0, v)
 	assert.False(t, ok)
 }
+
+func TestGetURLFloatArgOrFail(t *testing.T) {
+	req := &http.Request{URL: &url.URL{}}
+	args := req.URL.Query()
+	args.Add("foo", "37.145")
+	args.Add("bar", "hit")
+	req.URL.RawQuery = args.Encode()
+	ctx := new(gin.Context)
+	ctx.Request = req
+	v, ok := GetURLFloatArgOrFail(ctx, "foo", 0)
+	assert.InDelta(t, 37.145, v, 0.0001)
+	assert.True(t, ok)
+}
+
+func TestGetURFloatArgOrFailDefault(t *testing.T) {
+	req := &http.Request{URL: &url.URL{}}
+	args := req.URL.Query()
+	args.Add("bar", "hit")
+	req.URL.RawQuery = args.Encode()
+	ctx := new(gin.Context)
+	ctx.Request = req
+	v, ok := GetURLFloatArgOrFail(ctx, "foo", 137.0)
+	assert.InDelta(t, 137.0, v, 0.01)
+	assert.True(t, ok)
+}
+
+func TestGetURLFloatArgOrFailInvalid(t *testing.T) {
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Request = &http.Request{URL: &url.URL{}}
+	args := ctx.Request.URL.Query()
+	args.Add("foo", "a30")
+	args.Add("bar", "hit")
+	ctx.Request.URL.RawQuery = args.Encode()
+	v, ok := GetURLFloatArgOrFail(ctx, "foo", 0)
+	assert.Equal(t, 0.0, v)
+	assert.False(t, ok)
+}
