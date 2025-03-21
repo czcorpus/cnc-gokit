@@ -45,3 +45,12 @@ func Or[T comparable](vals ...T) T {
 	}
 	return zero
 }
+
+// Ternary returns either ifTrue or ifFalse based on condition.
+// (similar to the ternary operator: condition ? ifTrue : ifFalse)
+func Ternary[T any](condition bool, ifTrue T, ifFalse T) T {
+	if condition {
+		return ifTrue
+	}
+	return ifFalse
+}
