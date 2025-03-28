@@ -82,6 +82,30 @@ func GetURLIntArgOrFail(ctx *gin.Context, name string, dflt int) (int, bool) {
 	return value, true
 }
 
+// RequireURLIntArgOrFail is a variant of GetURLIntArgOrFail without a default value
+// which triggers an error in case the value is not found.
+func RequireURLIntArgOrFail(ctx *gin.Context, name string) (int, bool) {
+	if !ctx.Request.URL.Query().Has(name) {
+		uniresp.RespondWithErrorJSON(
+			ctx,
+			fmt.Errorf("missing argument %s", name),
+			http.StatusBadRequest,
+		)
+		return 0, false
+	}
+	tmp := ctx.Request.URL.Query().Get(name)
+	value, err := strconv.Atoi(tmp)
+	if err != nil {
+		uniresp.WriteJSONErrorResponse(
+			ctx.Writer,
+			uniresp.NewActionErrorFrom(err),
+			http.StatusUnprocessableEntity,
+		)
+		return 0, false
+	}
+	return value, true
+}
+
 // GetURLFloatArgOrFail reads a string-encoded float argument from URL query.
 // If not set, then `dflt` is returned (i.e. value not present is considered a non-error).
 // The second returned value is an "OK" flag.
@@ -104,6 +128,30 @@ func GetURLFloatArgOrFail(ctx *gin.Context, name string, dflt float64) (float64,
 	return value, true
 }
 
+// RequireURLFloatArgOrFail is a variant of GetURLFloatArgOrFail without a default value
+// which triggers an error in case the value is not found.
+func RequireURLFloatArgOrFail(ctx *gin.Context, name string) (float64, bool) {
+	if !ctx.Request.URL.Query().Has(name) {
+		uniresp.RespondWithErrorJSON(
+			ctx,
+			fmt.Errorf("missing argument %s", name),
+			http.StatusBadRequest,
+		)
+		return 0, false
+	}
+	tmp := ctx.Request.URL.Query().Get(name)
+	value, err := strconv.ParseFloat(tmp, 32)
+	if err != nil {
+		uniresp.WriteJSONErrorResponse(
+			ctx.Writer,
+			uniresp.NewActionErrorFrom(err),
+			http.StatusUnprocessableEntity,
+		)
+		return 0, false
+	}
+	return value, true
+}
+
 // GetURLBoolArgOrFail reads a string-encoded bool argument (= '1', '0') from URL query.
 // If not set, then `dflt` is returned (i.e. value not present is considered a non-error).
 // The second returned value is an "OK" flag.
@@ -112,6 +160,35 @@ func GetURLFloatArgOrFail(ctx *gin.Context, name string, dflt float64) (float64,
 func GetURLBoolArgOrFail(ctx *gin.Context, name string, dflt bool) (bool, bool) {
 	if !ctx.Request.URL.Query().Has(name) {
 		return dflt, true
+	}
+	tmp := ctx.Request.URL.Query().Get(name)
+	if tmp == "0" {
+		return false, true
+
+	} else if tmp == "1" {
+		return true, true
+
+	} else {
+		err := fmt.Errorf("invalid URL bool value: %s", tmp)
+		uniresp.WriteJSONErrorResponse(
+			ctx.Writer,
+			uniresp.NewActionErrorFrom(err),
+			http.StatusUnprocessableEntity,
+		)
+		return false, false
+	}
+}
+
+// RequireURLBoolArgOrFail is a variant of GetURLBoolArgOrFail without a default value
+// which triggers an error in case the value is not found.
+func RequireURLBoolArgOrFail(ctx *gin.Context, name string, dflt bool) (bool, bool) {
+	if !ctx.Request.URL.Query().Has(name) {
+		uniresp.RespondWithErrorJSON(
+			ctx,
+			fmt.Errorf("missing argument %s", name),
+			http.StatusBadRequest,
+		)
+		return false, false
 	}
 	tmp := ctx.Request.URL.Query().Get(name)
 	if tmp == "0" {
