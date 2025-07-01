@@ -123,10 +123,15 @@ func (clist *CircularList[T]) Len() int {
 	return len(clist.items) - clist.numUnused
 }
 
-// ForEach runs a function fn for all the items
+// ForEach is just an alias for Iterate
+func (clist *CircularList[T]) ForEach(fn func(i int, item T) bool) {
+	clist.Iterate(fn)
+}
+
+// Iterate runs a function fn for all the items
 // starting from the oldest one. The iteration
 // continues until fn returns true.
-func (clist *CircularList[T]) ForEach(fn func(i int, item T) bool) {
+func (clist *CircularList[T]) Iterate(fn func(i int, item T) bool) {
 	for i := 0; i < clist.Len(); i++ {
 		ii := (clist.nextIdx + clist.numUnused + i) % len(clist.items)
 		cnt := fn(ii, clist.items[ii])

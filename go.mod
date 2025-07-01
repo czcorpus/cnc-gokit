@@ -1,6 +1,6 @@
 module github.com/czcorpus/cnc-gokit
 
-go 1.21
+go 1.23
 
 require (
 	github.com/gin-gonic/gin v1.9.1

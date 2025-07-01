@@ -16,15 +16,14 @@
 
 package collections
 
-import "errors"
-
-var ErrorStopIteration = errors.New("stopped iteration")
-
 type Multidict[T any] struct {
 	data map[string][]T
 }
 
 func (md *Multidict[T]) Add(k string, v T) {
+	if md.data == nil {
+		md.data = make(map[string][]T)
+	}
 	_, ok := md.data[k]
 	if !ok {
 		md.data[k] = make([]T, 0, 10)
@@ -33,17 +32,34 @@ func (md *Multidict[T]) Add(k string, v T) {
 }
 
 func (md *Multidict[T]) Get(k string) []T {
+	if md.data == nil {
+		md.data = make(map[string][]T)
+	}
 	return md.data[k]
 }
 
-func (md *Multidict[T]) ForEach(applyFn func(k string, v []T) error) error {
+func (md *Multidict[T]) Iterate(yield func(k string, v []T) bool) {
+	if md.data == nil {
+		md.data = make(map[string][]T)
+	}
 	for k, v := range md.data {
-		err := applyFn(k, v)
-		if err != nil {
-			return err
+		if !yield(k, v) {
+			return
 		}
 	}
-	return nil
+}
+
+func (md *Multidict[T]) IterateFlat(yield func(k string, v T) bool) {
+	if md.data == nil {
+		md.data = make(map[string][]T)
+	}
+	for k, v := range md.data {
+		for _, v2 := range v {
+			if !yield(k, v2) {
+				return
+			}
+		}
+	}
 }
 
 func NewMultidict[T any]() *Multidict[T] {

@@ -192,6 +192,19 @@ func TestBinTreeForEach(t *testing.T) {
 	assert.Equal(t, "0:1|1:10|2:12|3:30|4:128|5:147|6:237|", ans.String())
 }
 
+func TestBinTreeSupportsRangeIterate(t *testing.T) {
+	var bt BinTree[myInt]
+	bt.Add(30, 20, 40)
+	iTest := make([]int, 0, 3)
+	vTest := make([]myInt, 0, 3)
+	for i, v := range bt.Iterate {
+		iTest = append(iTest, i)
+		vTest = append(vTest, v)
+	}
+	assert.Equal(t, []int{0, 1, 2}, iTest)
+	assert.Equal(t, []myInt{20, 30, 40}, vTest)
+}
+
 func TestBinTreeForEachOnEmpty(t *testing.T) {
 	var bt BinTree[myInt]
 	var tst bool
