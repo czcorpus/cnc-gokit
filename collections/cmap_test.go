@@ -17,6 +17,7 @@ package collections
 
 import (
 	"encoding/json"
+	"sort"
 	"strings"
 	"testing"
 
@@ -134,7 +135,7 @@ func TestConcurrentMapFilter(t *testing.T) {
 }
 
 func TestForeach(t *testing.T) {
-	v := NewConcurrentMapFrom[string, int](map[string]int{
+	v := NewConcurrentMapFrom(map[string]int{
 		"foo": 1,
 		"bar": 2,
 		"baz": 3,
@@ -146,5 +147,31 @@ func TestForeach(t *testing.T) {
 
 		})
 	})
+}
 
+type cmapItem struct {
+	K string
+	V int
+}
+
+func TestIterate(t *testing.T) {
+	tstMap := NewConcurrentMapFrom(map[string]int{
+		"foo": 1,
+		"bar": 2,
+		"baz": 3,
+		"faz": 4,
+		"fuz": 5,
+	})
+	itemTest := make([]cmapItem, 0, 5)
+	for k, v := range tstMap.Iterate {
+		itemTest = append(itemTest, cmapItem{K: k, V: v})
+	}
+	sort.Slice(itemTest, func(i, j int) bool {
+		return itemTest[i].V < itemTest[j].V
+	})
+	assert.Equal(
+		t,
+		[]cmapItem{{"foo", 1}, {"bar", 2}, {"baz", 3}, {"faz", 4}, {"fuz", 5}},
+		itemTest,
+	)
 }

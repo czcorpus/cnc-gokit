@@ -74,6 +74,17 @@ func (set *Set[T]) ForEach(fn func(item T)) {
 	}
 }
 
+// Iterate supports "range" form iteration through
+// all the values of the set. The order of items
+// is not guaranteed to be stable.
+func (set *Set[T]) Iterate(yield func(item T) bool) {
+	for k := range set.data {
+		if !yield(k) {
+			return
+		}
+	}
+}
+
 func (set *Set[T]) Union(other Set[T]) *Set[T] {
 	set.testAndInit()
 	ans := NewSet(set.ToSlice()...)

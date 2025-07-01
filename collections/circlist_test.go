@@ -200,6 +200,23 @@ func TestForEach(t *testing.T) {
 	assert.Equal(t, []string{"action2", "action3", "action4", "action5"}, tmp)
 }
 
+func TestForEachIsIterator(t *testing.T) {
+	clist := NewCircularList[string](4)
+	clist.Append("a1")
+	clist.Append("a2")
+	clist.Append("a3")
+	clist.Append("a4")
+	clist.Append("a5")
+	iTest := make([]int, 0, 5)
+	vTest := make([]string, 0, 5)
+	for i, v := range clist.ForEach {
+		iTest = append(iTest, i)
+		vTest = append(vTest, v)
+	}
+	assert.Equal(t, iTest, []int{1, 2, 3, 0})
+	assert.Equal(t, vTest, []string{"a2", "a3", "a4", "a5"})
+}
+
 func TestForEachOnEmpty(t *testing.T) {
 	var cnt int
 	clist := NewCircularList[string](4)

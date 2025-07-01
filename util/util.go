@@ -30,7 +30,7 @@ func Max[T maths.EssentialNumTypes](v1 ...T) T {
 //
 // Deprecated: use `maths.Min` instead
 func Min[T maths.EssentialNumTypes](v1 ...T) T {
-	return maths.Min[T](v1...)
+	return maths.Min(v1...)
 }
 
 // Or returns first non-zero item out of provides ones.

@@ -65,6 +65,8 @@ func (cm *ConcurrentMap[K, T]) Delete(k K) {
 // value - which may or may not be available.
 // The method acquires locks only for necessary operations inside so
 // it should be deadlock-resistant.
+//
+// Deprecated: use Iterate
 func (cm *ConcurrentMap[K, T]) ForEach(yield func(k K, v T, ok bool)) {
 	var keys []K
 	cm.RLock()
@@ -80,6 +82,16 @@ func (cm *ConcurrentMap[K, T]) ForEach(yield func(k K, v T, ok bool)) {
 		v, ok := cm.data[k]
 		cm.RUnlock()
 		yield(k, v, ok)
+	}
+}
+
+func (cm *ConcurrentMap[K, T]) Iterate(yield func(k K, v T) bool) {
+	cm.RLock()
+	defer cm.RUnlock()
+	for k, v := range cm.data {
+		if !yield(k, v) {
+			return
+		}
 	}
 }
 

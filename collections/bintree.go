@@ -228,6 +228,10 @@ func (bt *BinTree[T]) Len() int {
 }
 
 func (bt *BinTree[T]) ForEach(fn func(i int, v T) bool) {
+	bt.Iterate(fn)
+}
+
+func (bt *BinTree[T]) Iterate(yield func(i int, v T) bool) {
 	if bt.length == 0 {
 		return
 	}
@@ -238,7 +242,7 @@ func (bt *BinTree[T]) ForEach(fn func(i int, v T) bool) {
 		node := stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
 
-		if !fn(i, node.value.(T)) {
+		if !yield(i, node.value.(T)) {
 			break
 		}
 		i++
