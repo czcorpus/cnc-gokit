@@ -17,6 +17,7 @@ For a documentation please see https://pkg.go.dev/github.com/czcorpus/cnc-gokit
 - `ConcurrentMap`
 - `MultiDict`
 - `Set`
+- `HSet` (a set for types that implement the Identifier interface)
 
 ### datetime
 
