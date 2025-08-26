@@ -56,11 +56,17 @@ func (ll LogLevel) IsValid() bool {
 }
 
 type LoggingConf struct {
-	Path        string   `json:"path"`
-	Level       LogLevel `json:"level"`
-	MaxFileSize int      `json:"maxFileSize"`
-	MaxFiles    int      `json:"maxFiles"`
-	MaxAgeDays  int      `json:"maxAgeDays"`
+
+	// Path specifies logging file path. If empty, then stderr
+	// is used.
+	Path string `json:"path"`
+
+	// Level specifies level of logging (debug, info, warning (warn), error)
+	Level LogLevel `json:"level"`
+
+	MaxFileSize int `json:"maxFileSize"`
+	MaxFiles    int `json:"maxFiles"`
+	MaxAgeDays  int `json:"maxAgeDays"`
 }
 
 func (conf *LoggingConf) validate() error {
@@ -109,10 +115,50 @@ func SetupLogging(conf LoggingConf) {
 	}
 }
 
+// -------
+
+type middlewareConf struct {
+	monitoringIPs      []string
+	monitoringUASubstr string
+}
+
+func reqMatchesMonitoring(ctx *gin.Context, conf middlewareConf) bool {
+	var ipMatch bool
+	for _, ip := range conf.monitoringIPs {
+		if ip == ctx.ClientIP() {
+			ipMatch = true
+			break
+		}
+	}
+	uaMatch := strings.Contains(
+		strings.ToLower(ctx.Request.UserAgent()),
+		strings.ToLower(conf.monitoringUASubstr),
+	)
+	return ipMatch && uaMatch
+}
+
+func GinMiddlewareWithMonitoringIPs(ips []string) func(conf *middlewareConf) {
+	return func(conf *middlewareConf) {
+		conf.monitoringIPs = ips
+	}
+}
+
+func GinMiddlewareWithMonitoringUASubstr(substr string) func(conf *middlewareConf) {
+	return func(conf *middlewareConf) {
+		conf.monitoringUASubstr = substr
+	}
+}
+
 // GinMiddleware is a zerolog logging middleware for Gin.
 // It is inspired by the original logging routine from the
 // Gin project.
-func GinMiddleware() gin.HandlerFunc {
+func GinMiddleware(opts ...func(conf *middlewareConf)) gin.HandlerFunc {
+
+	var conf middlewareConf
+
+	for _, opt := range opts {
+		opt(&conf)
+	}
 
 	return func(ctx *gin.Context) {
 		start := time.Now()
@@ -143,6 +189,10 @@ func GinMiddleware() gin.HandlerFunc {
 			Int("bodySize", ctx.Writer.Size()).
 			Str("userAgent", ctx.Request.UserAgent()).
 			Str("path", path)
+
+		if reqMatchesMonitoring(ctx, conf) {
+			logEvent = logEvent.Bool("isMonitoring", true)
+		}
 
 		for k, v := range ctx.Keys {
 			if strings.HasPrefix(k, logEventPrefix) {
