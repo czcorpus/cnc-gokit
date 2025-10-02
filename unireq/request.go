@@ -61,12 +61,18 @@ func ClientIP(req *http.Request) net.IP {
 	return net.ParseIP(req.RemoteAddr)
 }
 
+type userAgentProvider interface {
+	UserAgent() string
+}
+
 // IsAIBot provides basic detection of mainstream AI bots.
+// It is typically used along with http.Request but any
+// type providing UserAgent method can be provided.
 //
 // The function is intended for informational purposes only
 // (e.g. for API usage stats) and should not be used to decide
 // who to ban, etc. as the detection is not very sophisticated.
-func IsAIBot(req *http.Request) bool {
+func IsAIBot(req userAgentProvider) bool {
 	return strings.Contains(req.UserAgent(), "GPT") ||
 		strings.Contains(req.UserAgent(), "Claude") ||
 		strings.Contains(req.UserAgent(), "Perplexity") ||
