@@ -22,6 +22,7 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/czcorpus/cnc-gokit/collections"
 	"github.com/czcorpus/cnc-gokit/uniresp"
@@ -58,6 +59,18 @@ func ClientIP(req *http.Request) net.IP {
 		return net.ParseIP(src)
 	}
 	return net.ParseIP(req.RemoteAddr)
+}
+
+// IsAIBot provides basic detection of mainstream AI bots.
+//
+// The function is intended for informational purposes only
+// (e.g. for API usage stats) and should not be used to decide
+// who to ban, etc. as the detection is not very sophisticated.
+func IsAIBot(req *http.Request) bool {
+	return strings.Contains(req.UserAgent(), "GPT") ||
+		strings.Contains(req.UserAgent(), "Claude") ||
+		strings.Contains(req.UserAgent(), "Perplexity") ||
+		strings.Contains(req.UserAgent(), "Gemini-Deep-Research") // most stuff is done by GoogleBot though
 }
 
 // GetURLIntArgOrFail reads a string-encoded integer argument from URL query.
