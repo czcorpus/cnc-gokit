@@ -16,8 +16,42 @@
 
 package collections
 
-func MapUpdate[K comparable, V any](curr map[K]V, incom map[K]V) {
+import (
+	"cmp"
+	"slices"
+)
+
+func MapUpdate[K cmp.Ordered, V any](curr map[K]V, incom map[K]V) {
 	for k, v := range incom {
 		curr[k] = v
 	}
+}
+
+type MapEntry[K cmp.Ordered, V any] struct {
+	K K
+	V V
+}
+
+func mapToEntries[K cmp.Ordered, V any](data map[K]V, sortBy func(a, b MapEntry[K, V]) int) []MapEntry[K, V] {
+	ans := make([]MapEntry[K, V], len(data))
+	i := 0
+	for k, v := range data {
+		ans[i] = MapEntry[K, V]{K: k, V: v}
+		i++
+	}
+	if sortBy != nil {
+		slices.SortFunc(ans, sortBy)
+	}
+	return ans
+}
+
+// MapToEntries transforms any map with keys cmp.Ordered to a slice of entries
+func MapToEntries[K cmp.Ordered, V any](data map[K]V) []MapEntry[K, V] {
+	return mapToEntries(data, nil)
+}
+
+// MapToEntries transforms any map with keys cmp.Ordered to a slice of entries,
+// sorted by provided function (the rules for the function are the same as in slices.SortFunc)
+func MapToEntriesSorted[K cmp.Ordered, V any](data map[K]V, sortBy func(a, b MapEntry[K, V]) int) []MapEntry[K, V] {
+	return mapToEntries(data, sortBy)
 }
