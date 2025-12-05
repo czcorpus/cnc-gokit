@@ -195,8 +195,12 @@ func GinMiddleware(opts ...func(conf *middlewareConf)) gin.HandlerFunc {
 		}
 
 		for k, v := range ctx.Keys {
-			if strings.HasPrefix(k, logEventPrefix) {
-				logEvent = logEvent.Any(k[len(logEventPrefix):], v)
+			kStr, ok := k.(string)
+			if !ok {
+				continue
+			}
+			if strings.HasPrefix(kStr, logEventPrefix) {
+				logEvent = logEvent.Any(kStr[len(logEventPrefix):], v)
 			}
 		}
 		logEvent.Send()
