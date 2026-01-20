@@ -100,3 +100,30 @@ func sliceSample[T any](data []T, sampleSize int, rnd randomSource) []T {
 func SliceSample[T any](data []T, sampleSize int) []T {
 	return sliceSample(data, sampleSize, rand.New(rand.NewSource(time.Now().Unix())))
 }
+
+// SliceGroupBy takse a slice and groups its items based on
+// how function `key` associates string values to each individual
+// item.
+// The order of groups is not guaranteed (it comes from how
+// internally used map works).
+func SliceGroupBy[T any](items []T, key func(v T) string) [][]T {
+	tmp := make(map[string][]T)
+	numGroups := 0
+	for _, item := range items {
+		k := key(item)
+		curr, ok := tmp[k]
+		if !ok {
+			numGroups++
+			curr = make([]T, 0, len(items)/4)
+		}
+		curr = append(curr, item)
+		tmp[k] = curr
+	}
+	ans := make([][]T, numGroups)
+	i := 0
+	for _, v := range tmp {
+		ans[i] = v
+		i++
+	}
+	return ans
+}
