@@ -17,6 +17,8 @@
 package collections
 
 import (
+	"fmt"
+
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -172,4 +174,77 @@ func TestRandomSampleMaxSample(t *testing.T) {
 	// 2) [1]  0, 1, 2, 3
 	// 3)      0, 1, 2, 3
 	assert.Equal(t, []int{0, 1, 2, 3}, ans)
+}
+
+type groupable struct {
+	Type    string
+	Enabled bool
+	ID      int
+}
+
+func TestSliceGroupBy(t *testing.T) {
+	key := func(v groupable) string {
+		return fmt.Sprintf("%t-%s", v.Enabled, v.Type)
+	}
+	items := []groupable{
+		{Type: "A", Enabled: true, ID: 1},
+		{Type: "B", Enabled: true, ID: 2},
+		{Type: "C", Enabled: true, ID: 3},
+		{Type: "A", Enabled: false, ID: 4},
+		{Type: "B", Enabled: false, ID: 5},
+		{Type: "C", Enabled: true, ID: 6},
+		{Type: "A", Enabled: true, ID: 7},
+		{Type: "B", Enabled: true, ID: 8},
+	}
+	groups := SliceGroupBy(items, key)
+
+	assert.Equal(t, 5, len(groups))
+
+	var grAt []groupable // should be 1, 7
+	var grAf []groupable // should be 4
+	var grBt []groupable // should be 2, 8
+	var grBf []groupable // should be 5
+	var grCt []groupable // should be 3, 6
+	for _, group := range groups {
+		if group[0].ID == 1 && group[1].ID == 7 {
+			grAt = group
+
+		} else if group[0].ID == 4 {
+			grAf = group
+
+		} else if group[0].ID == 2 && group[1].ID == 8 {
+			grBt = group
+
+		} else if group[0].ID == 5 {
+			grBf = group
+
+		} else if group[0].ID == 3 && group[1].ID == 6 {
+			grCt = group
+		}
+	}
+	assert.Equal(t, 2, len(grAt))
+	assert.Equal(t, 1, len(grAf))
+	assert.Equal(t, 2, len(grBt))
+	assert.Equal(t, 1, len(grBf))
+	assert.Equal(t, 2, len(grCt))
+
+}
+
+func TestSliceGroupByEmpty(t *testing.T) {
+	key := func(v groupable) string {
+		return v.Type
+	}
+	items := []groupable{}
+	groups := SliceGroupBy(items, key)
+	assert.Equal(t, 0, len(groups))
+}
+
+func TestSliceGroupBySingleGroup(t *testing.T) {
+	key := func(v int) string {
+		return "all"
+	}
+	items := []int{1, 2, 3, 4, 5}
+	groups := SliceGroupBy(items, key)
+	assert.Equal(t, 1, len(groups))
+	assert.ElementsMatch(t, []int{1, 2, 3, 4, 5}, groups[0])
 }
