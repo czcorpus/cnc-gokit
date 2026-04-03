@@ -227,6 +227,46 @@ func TestForEachOnEmpty(t *testing.T) {
 	assert.Equal(t, 0, cnt)
 }
 
+func TestIterateOverInternalRange(t *testing.T) {
+	clist := NewCircularList[string](4)
+	clist.Append("a1")
+	clist.Append("a2")
+	i1 := clist.AppendAndGetInternalIdx("a3")
+	clist.Append("a4")
+	i2 := clist.AppendAndGetInternalIdx("a5")
+	assert.Equal(t, 2, i1)
+	assert.Equal(t, 0, i2)
+
+	tstIdx := 0
+	for i, v := range clist.IterateOverInternalRange(2, 0) {
+		switch tstIdx {
+		case 0:
+			assert.Equal(t, 2, i)
+			assert.Equal(t, "a3", v)
+		case 1:
+			assert.Equal(t, 3, i)
+			assert.Equal(t, "a4", v)
+		case 2:
+			assert.Equal(t, 0, i)
+			assert.Equal(t, "a5", v)
+		}
+		tstIdx++
+	}
+	assert.Equal(t, 3, tstIdx, "3 items were iterated")
+}
+
+func TestIterateOverInternalRangeNonFull(t *testing.T) {
+	clist := NewCircularList[string](4)
+	clist.Append("a1")
+	clist.Append("a2")
+
+	result := make([]string, 0, 4)
+	for _, v := range clist.IterateOverInternalRange(0, 3) {
+		result = append(result, v)
+	}
+	assert.Equal(t, []string{"a1", "a2", "", ""}, result)
+}
+
 func TestGOBEncodeDecode(t *testing.T) {
 	clist := NewCircularList[string](4)
 	clist.Append("a")

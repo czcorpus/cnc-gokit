@@ -42,11 +42,21 @@ func (clist *CircularList[T]) calcIdx(idx int) int {
 // free capacity is depleted, then the oldest item is replaced by
 // this new one.
 func (clist *CircularList[T]) Append(v T) {
-	clist.items[clist.nextIdx] = v
-	clist.nextIdx = (clist.nextIdx + 1) % len(clist.items)
+	clist.AppendAndGetInternalIdx(v)
+}
+
+// AppendAndGetInternalIdx adds a new item to the end of the list. In case the
+// free capacity is depleted, then the oldest item is replaced by
+// this new one.
+// The method returns item's internal index
+func (clist *CircularList[T]) AppendAndGetInternalIdx(v T) int {
+	usedIdx := clist.nextIdx
+	clist.items[usedIdx] = v
+	clist.nextIdx = (usedIdx + 1) % len(clist.items)
 	if clist.numUnused > 0 {
 		clist.numUnused--
 	}
+	return usedIdx
 }
 
 func (clist *CircularList[T]) Prepend(v T) {
@@ -106,16 +116,18 @@ func (clist *CircularList[T]) ShiftUntil(fn func(item T) bool) {
 	}
 }
 
-// Get returns an item with a specific index.
-// Please note that for CircularList, this
-// method is not very usable as the index
-// does not represent anything specific for
-// the outside world.
+// Get returns an item based on its order from oldest to newest.
 func (clist *CircularList[T]) Get(idx int) T {
 	if idx >= clist.Len() {
 		panic(fmt.Sprintf("index out of range [%d] with length %d", idx, clist.Len()))
 	}
 	return clist.items[clist.calcIdx(idx)]
+}
+
+// GetByInternalIdx returns an item by its internal index, as obtained via
+// AppendAndGetInternalIdx.
+func (clist *CircularList[T]) GetByInternalIdx(idx int) T {
+	return clist.items[idx]
 }
 
 // Len returns size of the list
@@ -131,12 +143,38 @@ func (clist *CircularList[T]) ForEach(fn func(i int, item T) bool) {
 // Iterate runs a function fn for all the items
 // starting from the oldest one. The iteration
 // continues until fn returns true.
+// The passed in
 func (clist *CircularList[T]) Iterate(fn func(i int, item T) bool) {
 	for i := 0; i < clist.Len(); i++ {
 		ii := (clist.nextIdx + clist.numUnused + i) % len(clist.items)
 		cnt := fn(ii, clist.items[ii])
 		if !cnt {
 			break
+		}
+	}
+}
+
+// IterateOverInternalRange returns an iterator over a range of internal indices
+// [i1, i2] inclusive, where indices are obtained via AppendAndGetInternalIdx.
+// Wrap-around ranges are supported: e.g. i1=13, i2=7 on a capacity-16 list
+// iterates through 13, 14, 15, 0, 1, ..., 7.
+// Note: if the list is not full, unused slots within the range will yield
+// zero values of type T.
+func (clist *CircularList[T]) IterateOverInternalRange(i1, i2 int) func(fn func(i int, item T) bool) {
+	return func(fn func(i int, item T) bool) {
+		var numIter int
+		if i2 >= i1 {
+			numIter = i2 - i1 + 1
+
+		} else {
+			numIter = len(clist.items) - i1 + i2 + 1
+		}
+		for i := i1; i < i1+numIter; i++ {
+			ii := i % len(clist.items)
+			cnt := fn(ii, clist.items[ii])
+			if !cnt {
+				break
+			}
 		}
 	}
 }
