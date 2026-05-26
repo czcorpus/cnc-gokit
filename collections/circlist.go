@@ -34,6 +34,7 @@ type CircularList[T any] struct {
 	numUnused int
 }
 
+// calcIdx converts a logical index (0 = oldest item) to the physical slice index.
 func (clist *CircularList[T]) calcIdx(idx int) int {
 	return (clist.nextIdx + clist.numUnused + idx) % len(clist.items)
 }
@@ -48,7 +49,7 @@ func (clist *CircularList[T]) Append(v T) {
 // AppendAndGetInternalIdx adds a new item to the end of the list. In case the
 // free capacity is depleted, then the oldest item is replaced by
 // this new one.
-// The method returns item's internal index
+// The method returns item's internal index for possible additional manipulation.
 func (clist *CircularList[T]) AppendAndGetInternalIdx(v T) int {
 	usedIdx := clist.nextIdx
 	clist.items[usedIdx] = v
@@ -59,6 +60,10 @@ func (clist *CircularList[T]) AppendAndGetInternalIdx(v T) int {
 	return usedIdx
 }
 
+// Prepend inserts v at the logical beginning (oldest position) of the list.
+// If the list has unused capacity, existing items are shifted right and v occupies
+// index 0. If the list is full, the newest item is silently overwritten, since there
+// is no free slot available at the beginning.
 func (clist *CircularList[T]) Prepend(v T) {
 	if clist.numUnused == 0 {
 		idx := (len(clist.items) + clist.nextIdx - 1) % len(clist.items)
@@ -97,12 +102,19 @@ func (clist *CircularList[T]) Last() T {
 	return clist.items[idx]
 }
 
-// ShiftUntil removes old items starting from the oldest one
-// and moving towards newer ones until 'fn' returns true.
-// In case there are no more items to remove, the function
-// will handle this gracefully without errors.
-// This can be used to e.g. clean old log records.
+// ShiftUntil
+//
+// Deprecated: use DeleteWhile
 func (clist *CircularList[T]) ShiftUntil(fn func(item T) bool) {
+	clist.DeleteWhile(fn)
+}
+
+// DeleteWhile removes items starting from the oldest one, continuing while
+// fn returns true, and stopping at the first item for which fn returns false.
+// If the list becomes empty before fn returns false, the function returns
+// without error. This is useful for discarding expired records, e.g. log
+// entries older than a given timestamp.
+func (clist *CircularList[T]) DeleteWhile(fn func(item T) bool) {
 	if clist.Len() == 0 {
 		return
 	}
@@ -116,7 +128,8 @@ func (clist *CircularList[T]) ShiftUntil(fn func(item T) bool) {
 	}
 }
 
-// Get returns an item based on its order from oldest to newest.
+// Get returns an item based on its order from the oldest (0),
+// to newest (Len() - 1).
 func (clist *CircularList[T]) Get(idx int) T {
 	if idx >= clist.Len() {
 		panic(fmt.Sprintf("index out of range [%d] with length %d", idx, clist.Len()))
@@ -136,18 +149,44 @@ func (clist *CircularList[T]) Len() int {
 }
 
 // ForEach is just an alias for Iterate
+//
+// Deprecated: use Iterate instead
 func (clist *CircularList[T]) ForEach(fn func(i int, item T) bool) {
 	clist.Iterate(fn)
 }
 
-// Iterate runs a function fn for all the items
-// starting from the oldest one. The iteration
-// continues until fn returns true.
-// The passed in
-func (clist *CircularList[T]) Iterate(fn func(i int, item T) bool) {
+// Iterate goes through all items from oldest to newest, calling yield for each.
+// The first argument passed to yield is the item's internal (physical) array index,
+// not a logical sequence number. Use that index with GetByInternalIdx if needed.
+// Returning false from yield stops the iteration early.
+//
+// Deprecated: use either IterateInternal or IterateLogical based on your
+// needs.
+func (clist *CircularList[T]) Iterate(yield func(i int, item T) bool) {
+	clist.IterateInternal(yield)
+}
+
+// IterateInternal goes through all items from oldest to newest, calling yield for each.
+// The first argument passed to yield is the item's internal (physical) array index,
+// not a logical sequence number. Use that index with GetByInternalIdx if needed.
+// Returning false from yield stops the iteration early.
+func (clist *CircularList[T]) IterateInternal(yield func(i int, item T) bool) {
 	for i := 0; i < clist.Len(); i++ {
 		ii := (clist.nextIdx + clist.numUnused + i) % len(clist.items)
-		cnt := fn(ii, clist.items[ii])
+		cnt := yield(ii, clist.items[ii])
+		if !cnt {
+			break
+		}
+	}
+}
+
+// IterateLogical goes through all items from oldest to newest, calling yield for each.
+// The first argument passed to yield is the logical index (0 = oldest, Len()-1 = newest).
+// Returning false from yield stops the iteration early.
+func (clist *CircularList[T]) IterateLogical(yield func(i int, item T) bool) {
+	for i := 0; i < clist.Len(); i++ {
+		ii := (clist.nextIdx + clist.numUnused + i) % len(clist.items)
+		cnt := yield(i, clist.items[ii])
 		if !cnt {
 			break
 		}
@@ -160,7 +199,7 @@ func (clist *CircularList[T]) Iterate(fn func(i int, item T) bool) {
 // iterates through 13, 14, 15, 0, 1, ..., 7.
 // Note: if the list is not full, unused slots within the range will yield
 // zero values of type T.
-func (clist *CircularList[T]) IterateOverInternalRange(i1, i2 int) func(fn func(i int, item T) bool) {
+func (clist *CircularList[T]) IterateOverInternalRange(i1, i2 int) func(yield func(i int, item T) bool) {
 	return func(fn func(i int, item T) bool) {
 		var numIter int
 		if i2 >= i1 {
@@ -209,13 +248,10 @@ func (clist *CircularList[T]) GobDecode(data []byte) error {
 	return nil
 }
 
-// NewCircularList is a recommended factory function
-// for CircularList.
-// The parameter `capacity` defines max. number
-// of items the instance will be able to store. Internally,
-// the CircularList works with slices, so the effect of the
-// capacity argument on memory is the same as in the expression
-// `make([]T, 0, capacity)`.
+// NewCircularList is the recommended factory function for CircularList.
+// The capacity parameter sets the maximum number of items the list can hold.
+// All capacity slots are allocated upfront as a fixed-size array, so the full
+// memory is reserved immediately regardless of how many items have been appended.
 func NewCircularList[T any](capacity int) *CircularList[T] {
 	return &CircularList[T]{
 		items:     make([]T, capacity),

@@ -227,6 +227,65 @@ func TestForEachOnEmpty(t *testing.T) {
 	assert.Equal(t, 0, cnt)
 }
 
+func TestIterateLogical(t *testing.T) {
+	clist := NewCircularList[string](4)
+	clist.Append("a1")
+	clist.Append("a2")
+	clist.Append("a3")
+	clist.Append("a4")
+	clist.Append("a5") // wraps; a1 is overwritten, oldest is now a2
+	iTest := make([]int, 0, 4)
+	vTest := make([]string, 0, 4)
+	clist.IterateLogical(func(i int, v string) bool {
+		iTest = append(iTest, i)
+		vTest = append(vTest, v)
+		return true
+	})
+	assert.Equal(t, []int{0, 1, 2, 3}, iTest)
+	assert.Equal(t, []string{"a2", "a3", "a4", "a5"}, vTest)
+}
+
+func TestIterateLogicalIsIterator(t *testing.T) {
+	clist := NewCircularList[string](4)
+	clist.Append("a1")
+	clist.Append("a2")
+	clist.Append("a3")
+	clist.Append("a4")
+	clist.Append("a5")
+	iTest := make([]int, 0, 4)
+	vTest := make([]string, 0, 4)
+	for i, v := range clist.IterateLogical {
+		iTest = append(iTest, i)
+		vTest = append(vTest, v)
+	}
+	assert.Equal(t, []int{0, 1, 2, 3}, iTest)
+	assert.Equal(t, []string{"a2", "a3", "a4", "a5"}, vTest)
+}
+
+func TestIterateLogicalEarlyStop(t *testing.T) {
+	clist := NewCircularList[string](4)
+	clist.Append("a1")
+	clist.Append("a2")
+	clist.Append("a3")
+	clist.Append("a4")
+	var cnt int
+	clist.IterateLogical(func(i int, v string) bool {
+		cnt++
+		return i < 1
+	})
+	assert.Equal(t, 2, cnt)
+}
+
+func TestIterateLogicalOnEmpty(t *testing.T) {
+	clist := NewCircularList[string](4)
+	var cnt int
+	clist.IterateLogical(func(i int, v string) bool {
+		cnt++
+		return true
+	})
+	assert.Equal(t, 0, cnt)
+}
+
 func TestIterateOverInternalRange(t *testing.T) {
 	clist := NewCircularList[string](4)
 	clist.Append("a1")

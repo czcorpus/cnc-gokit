@@ -18,6 +18,7 @@ package collections
 
 import (
 	"encoding/json"
+	"maps"
 	"sync"
 )
 
@@ -85,14 +86,63 @@ func (cm *ConcurrentMap[K, T]) ForEach(yield func(k K, v T, ok bool)) {
 	}
 }
 
+// Iterate goes through all the values in the wrapped map and calls
+// the yield function on them. It operates on a snapshot of the map taken
+// at the time of the call, so it does not hold any lock during iteration.
+// This makes it safe to call Set, Delete, Update, etc. from within the
+// yield function without risking a deadlock.
 func (cm *ConcurrentMap[K, T]) Iterate(yield func(k K, v T) bool) {
 	cm.RLock()
-	defer cm.RUnlock()
-	for k, v := range cm.data {
+	snapshot := maps.Clone(cm.data)
+	cm.RUnlock()
+	for k, v := range snapshot {
 		if !yield(k, v) {
 			return
 		}
 	}
+}
+
+// Find returns the first key-value pair matching pred. The third return value
+// indicates whether a match was found. Holds a read lock for its entire
+// duration — callers must not acquire a write lock from within pred.
+func (m *ConcurrentMap[K, V]) Find(pred func(K, V) bool) (K, V, bool) {
+	m.RLock()
+	defer m.RUnlock()
+	for k, v := range m.data {
+		if pred(k, v) {
+			return k, v, true
+		}
+	}
+	var zeroK K
+	var zeroV V
+	return zeroK, zeroV, false
+}
+
+// Any reports whether at least one entry satisfies pred. Holds a read lock
+// for its entire duration — callers must not acquire a write lock from within pred.
+func (m *ConcurrentMap[K, V]) Any(pred func(K, V) bool) bool {
+	m.RLock()
+	defer m.RUnlock()
+	for k, v := range m.data {
+		if pred(k, v) {
+			return true
+		}
+	}
+	return false
+}
+
+// Count returns the number of entries satisfying pred. Holds a read lock
+// for its entire duration — callers must not acquire a write lock from within pred.
+func (m *ConcurrentMap[K, V]) Count(pred func(K, V) bool) int {
+	m.RLock()
+	defer m.RUnlock()
+	n := 0
+	for k, v := range m.data {
+		if pred(k, v) {
+			n++
+		}
+	}
+	return n
 }
 
 func (cm *ConcurrentMap[K, T]) Update(fn func(k K, v T) T) {
