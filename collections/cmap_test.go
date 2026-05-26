@@ -134,6 +134,41 @@ func TestConcurrentMapFilter(t *testing.T) {
 	assert.Equal(t, 3, v.Len())
 }
 
+func TestConcurrentMapFind(t *testing.T) {
+	v := NewConcurrentMapFrom[string, int](map[string]int{
+		"foo": 1,
+		"bar": 2,
+		"baz": 3,
+	})
+	_, val, ok := v.Find(func(k string, v int) bool { return k == "bar" })
+	assert.True(t, ok)
+	assert.Equal(t, 2, val)
+
+	_, _, ok = v.Find(func(k string, v int) bool { return k == "missing" })
+	assert.False(t, ok)
+}
+
+func TestConcurrentMapAny(t *testing.T) {
+	v := NewConcurrentMapFrom[string, int](map[string]int{
+		"foo": 1,
+		"bar": 2,
+		"baz": 3,
+	})
+	assert.True(t, v.Any(func(k string, v int) bool { return v > 2 }))
+	assert.False(t, v.Any(func(k string, v int) bool { return v > 10 }))
+}
+
+func TestConcurrentMapCount(t *testing.T) {
+	v := NewConcurrentMapFrom[string, int](map[string]int{
+		"foo": 1,
+		"bar": 2,
+		"baz": 3,
+		"faz": 4,
+	})
+	assert.Equal(t, 2, v.Count(func(k string, v int) bool { return v%2 == 0 }))
+	assert.Equal(t, 0, v.Count(func(k string, v int) bool { return v > 10 }))
+}
+
 func TestForeach(t *testing.T) {
 	v := NewConcurrentMapFrom(map[string]int{
 		"foo": 1,
