@@ -68,6 +68,8 @@ TLS and authentication is supported.
 The `maths` package contains few useful functions for working with
 numbers (`Max`, `Min`, `RoundToN`) and statistics (`OnlineMean`)
 
+### mcptools
+
 ### strnum
 
 The `strnum` package contains functions for converting between numbers, slices of
